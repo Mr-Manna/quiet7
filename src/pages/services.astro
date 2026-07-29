@@ -1,0 +1,320 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ServicesList from '../components/ServicesList.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import Marquee from '../components/Marquee.astro';
+import Testimonials from '../components/Testimonials.astro';
+import Reveal from '../components/Reveal.astro';
+
+const process = [
+  { no: '01', title: 'Understand', body: 'We start with the business, not the pixels. Research, interviews, and a shared definition of what success actually looks like.' },
+  { no: '02', title: 'Shape', body: 'Strategy becomes direction. We explore boldly, narrow quickly, and pressure-test ideas against real constraints.' },
+  { no: '03', title: 'Craft', body: 'Design and engineering work side by side from day one, so what we show is what we can ship.' },
+  { no: '04', title: 'Launch & tend', body: 'We ship, measure, and refine. Good work is never really finished — it earns its keep over time.' },
+];
+
+const engagements = [
+  {
+    no: '01',
+    name: 'Project',
+    bestFor: 'Rebrands, new sites, product launches',
+    body: 'A defined scope with a clear start and end. We scope it together, agree a fixed fee, and give you a dedicated senior team until it ships.',
+    details: ['6–14 weeks, typically', 'Fixed scope, fixed fee', 'Weekly demos, no surprises'],
+  },
+  {
+    no: '02',
+    name: 'Retainer',
+    bestFor: 'Teams who need ongoing capacity',
+    body: 'An ongoing partnership. A reserved block of design and engineering time each month, spent wherever it moves the needle most.',
+    details: ['Rolling monthly', 'Priority access to the team', 'Continuous, compounding improvement'],
+  },
+  {
+    no: '03',
+    name: 'Advisory',
+    bestFor: 'In-house teams who need a compass',
+    body: 'Direction without the full build. We audit, run workshops, and set the system — then hand it to your team with the confidence to run it.',
+    details: ['Audits & design-system reviews', 'Strategy workshops', 'Fractional creative direction'],
+  },
+];
+
+const deliverables = [
+  'Brand strategy & positioning',
+  'Visual identity & guidelines',
+  'Naming & verbal tone',
+  'Design system + component library',
+  'Production-ready front-end',
+  'Accessible, tested code (WCAG AA)',
+  'Performance budget & audit',
+  'CMS setup and content model',
+  'Documentation & full handover',
+  'Post-launch support window',
+];
+
+const stack = [
+  { group: 'Design', tools: ['Figma', 'Adobe Suite', 'Rive', 'Blender'] },
+  { group: 'Front-end', tools: ['Astro', 'React', 'Next.js', 'Tailwind', 'GSAP'] },
+  { group: 'Back-end', tools: ['Node', 'TypeScript', 'Postgres', 'Prisma'] },
+  { group: 'Platforms', tools: ['Vercel', 'Sanity', 'Shopify', 'Webflow'] },
+];
+
+const faqs = [
+  {
+    q: 'How long does a typical project take?',
+    a: 'Most engagements run six to fourteen weeks, depending on scope. A focused brand sprint can be three; a full rebrand plus platform build is closer to four months. We give you a realistic range before you commit — not an optimistic one.',
+  },
+  {
+    q: 'How do you price work?',
+    a: 'Fixed fee against a fixed scope, agreed up front. You will know the number before we start, and it does not move unless the scope does. Retainers are billed monthly for a reserved block of team time.',
+  },
+  {
+    q: 'Can you do just the design, or just the build?',
+    a: 'Yes. Plenty of clients bring us in for one or the other. That said, the work is usually stronger when design and engineering sit together from day one — it is the main reason we keep both in-house.',
+  },
+  {
+    q: 'Do you work alongside in-house teams?',
+    a: 'Often. We can lead, or we can embed and support — running the system while your team runs the product. We document everything so nothing depends on us being in the room.',
+  },
+  {
+    q: 'What happens after launch?',
+    a: 'Every project includes a support window after go-live, and we hand over documentation your team can actually use. Many clients then move onto a light retainer so the work keeps improving instead of quietly decaying.',
+  },
+  {
+    q: 'Where are you based?',
+    a: 'We are remote-first across New York and Berlin, which means we overlap comfortably with most of North America and Europe. Timezone has never been the hard part — clarity is.',
+  },
+];
+---
+
+<BaseLayout
+  title="Services"
+  description="Branding, digital & product design, and development — three disciplines under one roof."
+>
+  <!-- Header -->
+  <section class="container-x pt-40 pb-16 md:pt-48">
+    <Reveal class="eyebrow mb-6"><span class="h-px w-8 bg-muted"></span>Services</Reveal>
+    <h1 class="max-w-4xl text-display-lg font-bold" data-statement>
+      Everything a brand needs to be seen, understood and used.
+    </h1>
+    <Reveal as="p" class="mt-8 max-w-xl text-lg text-muted">
+      We keep strategy, design and engineering under one roof. That’s how the work stays
+      coherent — and how it actually gets built.
+    </Reveal>
+  </section>
+
+  <!-- 01 — Capabilities -->
+  <section class="container-x section border-t border-line">
+    <SectionHeading index="01" eyebrow="Capabilities" title="What we do, in depth." class="mb-12" />
+    <ServicesList detailed />
+  </section>
+
+  <Marquee />
+
+  <!-- 02 — Process -->
+  <section class="container-x section border-t border-line">
+    <SectionHeading index="02" eyebrow="How we work" title="A calm, deliberate process." class="mb-14" />
+    <div class="grid gap-x-8 gap-y-12 md:grid-cols-2">
+      {process.map((step) => (
+        <Reveal>
+          <div class="border-t border-line pt-6">
+            <span class="index-num">{step.no}</span>
+            <h3 class="mt-2 text-display-sm font-bold">{step.title}</h3>
+            <p class="mt-3 text-muted">{step.body}</p>
+          </div>
+        </Reveal>
+      ))}
+    </div>
+  </section>
+
+  <!-- 03 — Engagement models -->
+  <section class="container-x section border-t border-line">
+    <SectionHeading
+      index="03"
+      eyebrow="Ways to work together"
+      title="Three ways to bring us in."
+      class="mb-14"
+    />
+    <div class="grid gap-px border border-line bg-line md:grid-cols-3">
+      {engagements.map((e) => (
+        <Reveal>
+          <article class="eng flex h-full flex-col bg-bg p-8 md:p-10">
+            <span class="index-num">{e.no}</span>
+            <h3 class="mt-3 text-display-sm font-bold">{e.name}</h3>
+            <p class="mt-2 text-xs font-medium uppercase tracking-[0.16em] text-accent-text">
+              {e.bestFor}
+            </p>
+            <p class="mt-5 flex-1 text-muted">{e.body}</p>
+            <ul class="mt-7 space-y-2 border-t border-line pt-5">
+              {e.details.map((d) => (
+                <li class="flex items-start gap-3 text-sm">
+                  <span class="mt-[0.55em] h-1 w-1 shrink-0 rounded-full bg-accent"></span>
+                  <span>{d}</span>
+                </li>
+              ))}
+            </ul>
+          </article>
+        </Reveal>
+      ))}
+    </div>
+  </section>
+
+  <!-- 04 — Deliverables -->
+  <section class="container-x section border-t border-line">
+    <div class="grid gap-10 md:grid-cols-12">
+      <div class="md:col-span-5">
+        <SectionHeading index="04" eyebrow="Deliverables" title="What you actually get." />
+        <Reveal as="p" class="mt-6 max-w-md text-muted">
+          No vague “brand refresh.” Every engagement ends with things you own, understand and
+          can keep using long after we’ve gone.
+        </Reveal>
+      </div>
+      <div class="md:col-span-7">
+        <ul class="border-t border-line">
+          {deliverables.map((d, i) => (
+            /* `as="li"` — a <ul> may only contain <li>. Reveal defaults to a
+               <div>, which is invalid here. */
+            <Reveal as="li" class="flex items-baseline gap-5 border-b border-line py-4">
+              <span class="index-num tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+              <span class="text-lg">{d}</span>
+            </Reveal>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 — Stack -->
+  <section class="container-x section border-t border-line">
+    <SectionHeading index="05" eyebrow="Stack" title="The tools we build with." class="mb-14" />
+    <div class="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+      {stack.map((s) => (
+        <Reveal>
+          <div class="border-t border-line pt-5">
+            <p class="eyebrow mb-4">{s.group}</p>
+            <div class="flex flex-wrap gap-2">
+              {s.tools.map((t) => (
+                <span class="border border-line px-3 py-1 text-xs text-muted">{t}</span>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+      ))}
+    </div>
+    <Reveal as="p" class="mt-10 max-w-2xl text-sm text-muted">
+      We choose tools to fit the problem, not the other way round — and we’ll happily work
+      inside whatever stack your team already lives in.
+    </Reveal>
+  </section>
+
+  <!-- 06 — Testimonials -->
+  <section class="container-x section border-t border-line">
+    <SectionHeading index="06" eyebrow="Kind words" title="Clients on working with us." class="mb-12" />
+    <Testimonials />
+  </section>
+
+  <!-- 07 — FAQ -->
+  <section class="container-x section border-t border-line">
+    <div class="grid gap-10 md:grid-cols-12">
+      <div class="md:col-span-4">
+        <SectionHeading index="07" eyebrow="Questions" title="Before you ask." />
+      </div>
+      <div class="md:col-span-8">
+        <div class="border-t border-line">
+          {faqs.map((f) => (
+            <Reveal>
+              <details class="faq">
+                <summary class="faq__q">
+                  <span>{f.q}</span>
+                  <span class="faq__icon" aria-hidden="true"></span>
+                </summary>
+                <div class="faq__a">
+                  <p>{f.a}</p>
+                </div>
+              </details>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Engagement cards */
+  .eng {
+    transition: background-color 0.4s ease;
+  }
+  .eng:hover {
+    background: rgb(var(--color-surface));
+  }
+
+  /* FAQ accordion (native <details>, no JS) */
+  .faq {
+    border-bottom: 1px solid rgb(var(--color-line));
+  }
+  .faq__q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: 1.5rem 0;
+    cursor: pointer;
+    list-style: none;
+    font-family: 'Space Grotesk Variable', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.1rem, 2vw, 1.45rem);
+    letter-spacing: -0.02em;
+    transition: color 0.3s ease;
+  }
+  .faq__q::-webkit-details-marker {
+    display: none;
+  }
+  .faq__q:hover {
+    color: rgb(var(--color-accent-text));
+  }
+  .faq__icon {
+    position: relative;
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+  }
+  .faq__icon::before,
+  .faq__icon::after {
+    content: '';
+    position: absolute;
+    /* UI icon → needs 3:1. Bright lime is only 1.86:1 on the light bg. */
+    background: rgb(var(--color-accent-text));
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .faq__icon::before {
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 2px;
+    transform: translateY(-50%);
+  }
+  .faq__icon::after {
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 100%;
+    transform: translateX(-50%);
+  }
+  /* plus → minus */
+  .faq[open] .faq__icon::after {
+    transform: translateX(-50%) rotate(90deg);
+  }
+  .faq__a {
+    max-width: 46rem;
+    padding-bottom: 1.75rem;
+    color: rgb(var(--color-muted));
+    line-height: 1.65;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .faq__icon::before,
+    .faq__icon::after,
+    .eng {
+      transition: none;
+    }
+  }
+</style>

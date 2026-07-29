@@ -1,0 +1,53 @@
+---
+// Rounded "pixel-block" tetromino cluster (Image 1). Tiles assemble in
+// on scroll (handled by the homepage script via [data-block]).
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+
+// [col, row, filled?] on a 5×5 grid — a staircase of rounded tiles.
+const cells: [number, number, boolean][] = [
+  [1, 1, true],
+  [2, 1, false],
+  [2, 2, true],
+  [3, 2, false],
+  [3, 3, true],
+  [4, 3, false],
+  [4, 4, true],
+  [5, 4, false],
+  [1, 3, false],
+  [5, 2, true],
+];
+---
+
+<div class={`blocks ${className}`} data-blocks aria-hidden="true">
+  {
+    cells.map(([col, row, on]) => (
+      <span
+        class="blocks__cell"
+        data-block
+        data-on={on ? '' : undefined}
+        style={`grid-column:${col};grid-row:${row}`}
+      />
+    ))
+  }
+</div>
+
+<style>
+  .blocks {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: clamp(0.35rem, 1vw, 0.6rem);
+    width: 100%;
+    aspect-ratio: 1 / 1;
+  }
+  .blocks__cell {
+    border-radius: clamp(10px, 1.6vw, 20px);
+    background: rgb(var(--color-line));
+  }
+  .blocks__cell[data-on] {
+    background: rgb(var(--color-accent));
+  }
+</style>

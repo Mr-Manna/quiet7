@@ -1,0 +1,249 @@
+---
+// Self-contained WebGL background: a slow flowing mesh-gradient (domain-
+// warped fbm noise) in the brand palette. Theme-aware (light ↔ dark),
+// no libraries/CDN. Falls back to a CSS gradient if WebGL is unavailable;
+// pauses off-screen and freezes for prefers-reduced-motion.
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+---
+
+<canvas class={`hero-canvas ${className}`} data-hero-canvas aria-hidden="true"></canvas>
+
+<style>
+  .hero-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 0;
+    background:
+      radial-gradient(60% 60% at 82% 12%, rgba(141, 199, 20, 0.28), transparent 62%),
+      radial-gradient(55% 55% at 8% 92%, rgba(15, 42, 27, 0.14), transparent 70%),
+      #f4f5ee;
+  }
+  :global(:root[data-theme='dark']) .hero-canvas {
+    background:
+      radial-gradient(60% 60% at 82% 12%, rgba(141, 199, 20, 0.16), transparent 62%),
+      radial-gradient(55% 55% at 8% 92%, rgba(0, 0, 0, 0.4), transparent 70%),
+      #0c110d;
+  }
+</style>
+
+<script>
+  import { whenIdleOrIntent, onReady, isLightweight } from '../scripts/motion';
+
+  const VERT = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
+  const FRAG = `
+    precision mediump float;
+    uniform float u_time;
+    uniform vec2 u_res;
+    uniform float u_dark;
+
+    float hash(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+    float noise(vec2 p){
+      vec2 i = floor(p), f = fract(p);
+      float a = hash(i), b = hash(i + vec2(1.0, 0.0)), c = hash(i + vec2(0.0, 1.0)), d = hash(i + vec2(1.0, 1.0));
+      vec2 u = f * f * (3.0 - 2.0 * f);
+      return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+    }
+    float fbm(vec2 p){
+      float v = 0.0, a = 0.5;
+      for(int i = 0; i < 5; i++){ v += a * noise(p); p *= 2.0; a *= 0.5; }
+      return v;
+    }
+
+    void main(){
+      vec2 uv = gl_FragCoord.xy / u_res.xy;
+      vec2 p = uv * vec2(u_res.x / u_res.y, 1.0) * 1.6;
+      float t = u_time * 0.035;
+
+      vec2 q = vec2(fbm(p + t), fbm(p - t + 4.0));
+      vec2 r = vec2(fbm(p + q * 2.0 + t * 1.2), fbm(p + q * 2.0 - t));
+      float n = fbm(p + r * 2.0);
+
+      // Light palette
+      vec3 cream  = vec3(0.957, 0.961, 0.933);
+      vec3 mint   = vec3(0.855, 0.918, 0.784);
+      vec3 lime   = vec3(0.553, 0.780, 0.078);
+      vec3 forest = vec3(0.059, 0.165, 0.106);
+      vec3 lcol = mix(cream, mint, smoothstep(0.15, 0.75, n));
+      lcol = mix(lcol, lime, smoothstep(0.55, 0.95, r.x) * 0.45);
+      lcol = mix(lcol, forest, smoothstep(0.82, 1.0, q.y) * 0.10);
+      lcol = mix(lcol, cream, smoothstep(0.65, 0.0, uv.x + (1.0 - uv.y)) * 0.35);
+
+      // Dark palette (kept dark enough for light text)
+      vec3 dbase = vec3(0.043, 0.063, 0.051);
+      vec3 dmid  = vec3(0.086, 0.125, 0.094);
+      vec3 dlime = vec3(0.40, 0.56, 0.10);
+      vec3 dcol = mix(dbase, dmid, smoothstep(0.15, 0.8, n));
+      dcol = mix(dcol, dlime, smoothstep(0.6, 0.98, r.x) * 0.30);
+      dcol = mix(dcol, vec3(0.02, 0.04, 0.03), smoothstep(0.8, 1.0, q.y) * 0.25);
+
+      vec3 col = mix(lcol, dcol, clamp(u_dark, 0.0, 1.0));
+      gl_FragColor = vec4(col, 1.0);
+    }
+  `;
+
+  function compile(gl: WebGLRenderingContext, type: number, src: string) {
+    const s = gl.createShader(type)!;
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+  const isDark = () => document.documentElement.dataset.theme === 'dark';
+
+  function initCanvas(canvas: HTMLCanvasElement) {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const gl = (canvas.getContext('webgl', { antialias: false, alpha: false }) ||
+      canvas.getContext('experimental-webgl')) as WebGLRenderingContext | null;
+    if (!gl) return; // CSS fallback stays visible
+
+    const prog = gl.createProgram()!;
+    gl.attachShader(prog, compile(gl, gl.VERTEX_SHADER, VERT));
+    gl.attachShader(prog, compile(gl, gl.FRAGMENT_SHADER, FRAG));
+    gl.linkProgram(prog);
+
+    // Do NOT read LINK_STATUS here. Querying it forces the driver to finish
+    // compiling synchronously, and on Windows (ANGLE -> HLSL) this shader's
+    // unrolled fbm blocks the main thread for ~700 ms — the single largest long
+    // task on the page. KHR_parallel_shader_compile lets the driver compile on
+    // its own thread; we poll a non-blocking completion flag and only read the
+    // status once it is actually ready.
+    const par = gl.getExtension('KHR_parallel_shader_compile');
+    const ready = () =>
+      !par || gl.getProgramParameter(prog, par.COMPLETION_STATUS_KHR) === true;
+
+    whenLinked(gl, prog, ready, () => setupProgram(gl, canvas, prog, reduce));
+  }
+
+  // Wait (without blocking) until the program has linked, then hand off.
+  function whenLinked(
+    gl: WebGLRenderingContext,
+    prog: WebGLProgram,
+    ready: () => boolean,
+    done: () => void
+  ) {
+    const poll = () => {
+      if (!ready()) {
+        requestAnimationFrame(poll);
+        return;
+      }
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+        console.error('[hero-canvas]', gl.getProgramInfoLog(prog));
+        return; // CSS fallback stays visible
+      }
+      done();
+    };
+    poll();
+  }
+
+  function setupProgram(
+    gl: WebGLRenderingContext,
+    canvas: HTMLCanvasElement,
+    prog: WebGLProgram,
+    reduce: boolean
+  ) {
+    gl.useProgram(prog);
+
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(prog, 'a');
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+    const uTime = gl.getUniformLocation(prog, 'u_time');
+    const uRes = gl.getUniformLocation(prog, 'u_res');
+    const uDark = gl.getUniformLocation(prog, 'u_dark');
+
+    let dark = isDark() ? 1 : 0;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const resize = () => {
+      const w = Math.max(1, Math.floor(canvas.clientWidth * dpr));
+      const h = Math.max(1, Math.floor(canvas.clientHeight * dpr));
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+        gl.viewport(0, 0, w, h);
+      }
+      gl.uniform2f(uRes, w, h);
+    };
+    const ro = new ResizeObserver(resize);
+    ro.observe(canvas);
+    resize();
+
+    let raf = 0;
+    let running = false;
+    const start = performance.now();
+    const draw = (timeSec: number) => {
+      dark += ((isDark() ? 1 : 0) - dark) * 0.08;
+      gl.uniform1f(uDark, dark);
+      gl.uniform1f(uTime, timeSec);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    };
+    const frame = (now: number) => {
+      draw((now - start) / 1000);
+      if (running) raf = requestAnimationFrame(frame);
+    };
+    const play = () => {
+      if (running || reduce) return;
+      running = true;
+      raf = requestAnimationFrame(frame);
+    };
+    const pause = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+
+    // First paint (and the only paint under reduced motion).
+    dark = isDark() ? 1 : 0;
+    draw(reduce ? 12 : 0);
+
+    // Redraw a single frame on theme change while not animating.
+    const mo = new MutationObserver(() => {
+      if (!running) { dark = isDark() ? 1 : 0; draw(reduce ? 12 : 0); }
+    });
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+    const io = new IntersectionObserver((e) => (e[0].isIntersecting ? play() : pause()), { threshold: 0 });
+    io.observe(canvas);
+
+    document.addEventListener('astro:before-swap', () => {
+      pause();
+      ro.disconnect();
+      io.disconnect();
+      mo.disconnect();
+      gl.getExtension('WEBGL_lose_context')?.loseContext();
+    }, { once: true });
+  }
+
+  function boot() {
+    document.querySelectorAll<HTMLCanvasElement>('[data-hero-canvas]').forEach((c) => {
+      if (c.dataset.ready) return;
+      c.dataset.ready = '1';
+      try {
+        initCanvas(c);
+      } catch (e) {
+        console.error('[hero-canvas]', e);
+      }
+    });
+  }
+
+  // Booting eagerly put shader compilation and the first WebGL frames inside the
+  // LCP window — ~770 ms of scripting plus heavy paint, for a canvas that is
+  // purely decorative. Nothing here is needed to render the hero, so it waits
+  // for idle (or the first sign of user intent): the hero text paints first and
+  // the field fades in behind it.
+  //
+  // On phones and low-end devices it never boots at all. The CSS gradient under
+  // the canvas is the hero background there — visually close, and it costs
+  // nothing.
+  onReady(() => {
+    if (isLightweight()) return;
+    whenIdleOrIntent(boot);
+  });
+</script>

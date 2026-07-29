@@ -1,0 +1,72 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Reveal from '../../components/Reveal.astro';
+
+export async function getStaticPaths() {
+  const articles = (await getCollection('journal')).sort(
+    (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+  );
+  return articles.map((article, i) => ({
+    params: { slug: article.id },
+    props: { article, next: articles[(i + 1) % articles.length] },
+  }));
+}
+
+const { article, next } = Astro.props;
+const { data } = article;
+const { Content } = await render(article);
+const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+---
+
+<BaseLayout
+  title={data.title}
+  description={data.excerpt}
+  article={{ published: data.date, author: data.author, section: data.category }}
+>
+  <article class="container-x pt-40 pb-12 md:pt-48">
+    <Reveal class="flex flex-wrap items-center gap-3 text-sm text-muted">
+      <a href="/journal" class="link-underline">Journal</a>
+      <span aria-hidden="true">/</span>
+      <span class="text-accent-text">{data.category}</span>
+    </Reveal>
+    <h1 class="mt-8 max-w-4xl text-display-lg font-bold" data-statement>{data.title}</h1>
+    <Reveal class="mt-8 flex flex-wrap gap-x-8 gap-y-2 border-t border-line pt-6 text-sm text-muted">
+      <span>By {data.author}</span>
+      <span>{fmt(data.date)}</span>
+      <span>{data.readTime} read</span>
+    </Reveal>
+  </article>
+
+  <section class="container-x pb-8">
+    <div class="prose-journal mx-auto max-w-2xl text-lg leading-relaxed">
+      <Content />
+    </div>
+  </section>
+
+  <section class="border-t border-line">
+    <a href={`/journal/${next.id}`} class="group container-x flex flex-col gap-4 py-16 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p class="eyebrow mb-3">Next article</p>
+        <p class="text-display-md font-bold transition-colors duration-300 group-hover:text-accent-text">{next.data.title}</p>
+      </div>
+      <span class="flex h-14 w-14 items-center justify-center border border-line text-xl transition-all duration-300 group-hover:border-ink group-hover:bg-ink group-hover:text-bg">→</span>
+    </a>
+  </section>
+</BaseLayout>
+
+<style>
+  .prose-journal :global(h2) {
+    font-family: 'Space Grotesk Variable', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-top: 2.75rem;
+    margin-bottom: 0.5rem;
+  }
+  .prose-journal :global(p) { margin-block: 1.25rem; color: rgb(var(--color-ink) / 0.82); }
+  .prose-journal :global(ul) { margin-block: 1.25rem; padding-left: 1.1rem; list-style: none; }
+  .prose-journal :global(li) { position: relative; margin-block: 0.6rem; padding-left: 1.1rem; color: rgb(var(--color-ink) / 0.82); }
+  .prose-journal :global(li::before) { content: ''; position: absolute; left: 0; top: 0.7em; width: 0.4rem; height: 0.4rem; border-radius: 9999px; background: rgb(var(--color-accent)); }
+  .prose-journal :global(strong) { color: rgb(var(--color-ink)); font-weight: 700; }
+</style>

@@ -1,0 +1,43 @@
+---
+// BACKUP — the original "How we build" (forest) section, exactly as it was
+// before the redesign. It lived inline in src/pages/index.astro.
+// To restore: drop <HowWeBuildBackup /> in place of <HowWeBuild /> on the
+// homepage (fix the import paths below — they assume src/components/).
+import WebGLField from '../src/components/WebGLField.astro';
+import BracketLabel from '../src/components/BracketLabel.astro';
+import BlockCluster from '../src/components/BlockCluster.astro';
+---
+
+<section class="hx-forest">
+  <WebGLField class="hx-forest__canvas" />
+  <div class="container-x hx-forest__grid">
+    <div class="hx-forest__copy">
+      <p class="hx-eyebrow hx-eyebrow--light"><BracketLabel text="How we build" /></p>
+      <h2 class="hx-forest__title" data-reveal>Built to be <em>understood.</em></h2>
+      <p class="hx-forest__body" data-reveal>
+        One senior team across strategy, design and engineering — so nothing gets lost in
+        translation between what we imagine and what we ship.
+      </p>
+      <div class="hx-forest__labels" data-reveal>
+        <BracketLabel text="Brand" /><BracketLabel text="Web" /><BracketLabel text="Build" /><BracketLabel text="Scale" />
+      </div>
+    </div>
+    <BlockCluster class="hx-forest__blocks" />
+  </div>
+</section>
+
+<style>
+  .hx-forest { position: relative; overflow: hidden; background: rgb(var(--forest)); color: rgb(var(--forest-ink)); --color-line: 32 60 42; padding-block: clamp(4rem, 10vw, 8rem); }
+  .hx-forest__canvas { position: absolute; inset: 0; z-index: 0; }
+  .hx-forest__grid { position: relative; z-index: 1; display: grid; gap: 3rem; align-items: center; }
+  @media (min-width: 900px) { .hx-forest__grid { grid-template-columns: 1.3fr 1fr; } }
+  .hx-forest__title { font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; font-size: clamp(2.2rem, 5vw, 4.5rem); line-height: 0.98; letter-spacing: -0.03em; margin-block: 1.25rem; }
+  .hx-forest__title em { font-style: normal; color: rgb(var(--color-accent)); }
+  .hx-forest__body { max-width: 32rem; color: rgb(var(--forest-ink) / 0.75); margin-bottom: 1.75rem; }
+  .hx-forest__labels { display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; }
+  .hx-forest__blocks { max-width: 20rem; margin-inline: auto; }
+
+  /* These two came from index.astro's scoped styles: */
+  .hx-eyebrow { font-size: 0.8rem; }
+  .hx-eyebrow--light :global(.brk) { color: rgb(var(--forest-ink)); }
+</style>

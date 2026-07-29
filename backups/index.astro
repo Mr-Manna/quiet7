@@ -1,0 +1,87 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import ServicesList from '../components/ServicesList.astro';
+import StatsBlock from '../components/StatsBlock.astro';
+import WorkGrid from '../components/WorkGrid.astro';
+import Testimonials from '../components/Testimonials.astro';
+import Marquee from '../components/Marquee.astro';
+import RealProblem from '../components/RealProblem.astro';
+import Principles from '../components/Principles.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import Reveal from '../components/Reveal.astro';
+
+const projects = (await getCollection('work'))
+  .filter((p) => p.data.featured)
+  .sort((a, b) => a.data.order - b.data.order);
+---
+
+<BaseLayout>
+  <Hero
+    eyebrow="Branding & development studio"
+    lines={['Data-driven.', 'User-focused.', 'Value-based.']}
+    lead="quiet seven is a digital communication studio. We craft brands, digital experiences and the software that carries them."
+    ctaLabel="Start a project"
+    ctaHref="/contact"
+  />
+
+  <Marquee />
+
+  <RealProblem />
+
+  <!-- Services -->
+  <section class="container-x section border-t border-line">
+    <div class="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+      <SectionHeading index="02" eyebrow="What we do" title="Three disciplines, one team." />
+      <Reveal>
+        <a href="/services" class="btn-outline">All services</a>
+      </Reveal>
+    </div>
+    <ServicesList />
+  </section>
+
+  <Principles />
+
+  <!-- Featured work -->
+  <section class="container-x section border-t border-line">
+    <div class="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+      <SectionHeading index="04" eyebrow="Selected work" title="Quiet work that speaks for itself." />
+      <Reveal>
+        <a href="/work" class="btn-outline">View all work</a>
+      </Reveal>
+    </div>
+    <WorkGrid projects={projects} />
+  </section>
+
+  <!-- About / stats teaser -->
+  <section class="container-x section border-t border-line">
+    <div class="grid gap-10 md:grid-cols-12">
+      <Reveal class="md:col-span-5">
+        <p class="mb-5 flex items-center gap-3">
+          <span class="index-num">05</span>
+          <span class="h-3 w-px bg-line" aria-hidden="true"></span>
+          <span class="eyebrow">The studio</span>
+        </p>
+        <h2 class="text-display-md font-bold">We strive to make the considered choice.</h2>
+      </Reveal>
+      <Reveal class="md:col-span-6 md:col-start-7 self-end">
+        <p class="text-lg text-muted">
+          We’re a small, senior team that believes the best digital work is quiet — it
+          removes friction instead of adding noise. We partner closely, ship end-to-end,
+          and stay accountable to outcomes, not deliverables.
+        </p>
+        <a href="/about" class="link-underline mt-6 inline-block font-medium">More about us →</a>
+      </Reveal>
+    </div>
+    <div class="mt-16">
+      <StatsBlock />
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="container-x section border-t border-line">
+    <SectionHeading index="06" eyebrow="Kind words" title="Clients on working with us." class="mb-12" />
+    <Testimonials />
+  </section>
+</BaseLayout>

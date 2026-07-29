@@ -1,0 +1,184 @@
+---
+// Session preloader: 0→100 counter, then a curtain wipe.
+//
+// PERF-CRITICAL — this used to be the worst thing on the site:
+//   • it imported GSAP (~130 KB) just to count to 100, and
+//   • it ran for ~3.9 s while calling lenis.stop() + overflow:hidden,
+//     so the hero didn't paint until then and the LCP element was the LOADER.
+//
+// Now: zero dependencies (CSS transitions + a tiny rAF counter), no scroll
+// lock, and the whole thing is done in ≤ 800 ms. The page underneath paints
+// immediately, so LCP is the hero text.
+//
+// Shows once per browser session, on whichever page the visitor lands on first.
+// Announces completion via `qs:intro-done` + window.__introDone so pages can
+// chain their entrance animations onto it.
+//
+// `html.intro-seen` (set pre-paint by BaseLayout's inline script) hides this
+// instantly on later loads/navigations, so there is never a flash.
+---
+
+{/* The no-JS fallback lives in BaseLayout's <head>: <style> is metadata
+    content and is only valid inside <head>, not <body>. */}
+<div id="intro" data-intro aria-hidden="true">
+  <div class="intro__row">
+    <span class="intro__name" data-intro-name>Quiet Seven</span>
+    <span class="intro__count"><span data-intro-count>0</span><i>/100</i></span>
+  </div>
+  <div class="intro__bar"><span data-intro-bar></span></div>
+</div>
+
+<style>
+  #intro {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 1.5rem;
+    padding: clamp(1.5rem, 5vw, 3rem);
+    background: rgb(15 42 27);
+    color: #f4f5ee;
+    transform: translateY(0);
+    transition: transform 0.55s cubic-bezier(0.76, 0, 0.24, 1);
+  }
+  /* Curtain wipe — driven by a class, not a JS animation library. */
+  #intro.is-done {
+    transform: translateY(-100%);
+  }
+  .intro__row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+  .intro__name {
+    font-family: 'Space Grotesk Variable', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.5rem, 5vw, 3rem);
+    letter-spacing: -0.03em;
+    transition:
+      transform 0.35s cubic-bezier(0.76, 0, 0.24, 1),
+      opacity 0.35s ease;
+  }
+  #intro.is-done .intro__name {
+    transform: translateY(-120%);
+    opacity: 0;
+  }
+  .intro__count {
+    font-family: 'Space Grotesk Variable', sans-serif;
+    font-weight: 700;
+    font-size: clamp(2.5rem, 10vw, 7rem);
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    color: #8dc714;
+    font-variant-numeric: tabular-nums;
+  }
+  .intro__count i {
+    font-size: 0.28em;
+    color: rgb(244 245 238 / 0.5);
+    font-style: normal;
+  }
+  .intro__bar {
+    height: 2px;
+    background: rgb(244 245 238 / 0.15);
+  }
+  .intro__bar span {
+    display: block;
+    height: 100%;
+    width: 100%;
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    background: #8dc714;
+    /* The counter drives this via style.transform; keep it buttery. */
+    will-change: transform;
+  }
+
+  /* Reduced motion: no curtain, no counter — it's hidden outright in JS. */
+  @media (prefers-reduced-motion: reduce) {
+    #intro,
+    .intro__name {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { onReady } from '../scripts/motion';
+
+  // No animation-library imports — this must not pull GSAP onto the critical path.
+  const DURATION = 600; // counter run, ms
+  const WIPE = 550; // must match the CSS transition above
+
+  function announceDone() {
+    (window as any).__introDone = true;
+    document.dispatchEvent(new CustomEvent('qs:intro-done'));
+  }
+
+  function initIntro() {
+    const intro = document.getElementById('intro');
+    if (!intro) {
+      announceDone();
+      return;
+    }
+    if (intro.dataset.ready) return;
+    intro.dataset.ready = '1';
+
+    const remove = () => {
+      intro.style.display = 'none';
+      announceDone();
+    };
+
+    let seen = false;
+    try {
+      seen = !!sessionStorage.getItem('qs-intro');
+    } catch {
+      /* private mode — just play it */
+    }
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (reduce || seen) {
+      remove();
+      return;
+    }
+    // Mark it seen for the REST of the session. Do not add `intro-seen` to
+    // <html> here: global.css uses that class to `display: none` the intro, so
+    // setting it now would hide the very thing we are about to animate. The
+    // pre-paint script in BaseLayout reads this flag and applies the class on
+    // subsequent loads, which is what prevents the flash.
+    try {
+      sessionStorage.setItem('qs-intro', '1');
+    } catch {
+      /* private mode — the intro simply plays again next load */
+    }
+
+    const countEl = intro.querySelector('[data-intro-count]');
+    const bar = intro.querySelector<HTMLElement>('[data-intro-bar]');
+
+    // NOTE: deliberately NO scroll lock. The page beneath is live and painting.
+    const start = performance.now();
+    const safety = window.setTimeout(remove, 3000); // can never trap the page
+
+    const tick = (now: number) => {
+      const t = Math.min((now - start) / DURATION, 1);
+      const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+      if (countEl) countEl.textContent = String(Math.round(eased * 100));
+      if (bar) bar.style.transform = `scaleX(${eased})`;
+
+      if (t < 1) {
+        requestAnimationFrame(tick);
+        return;
+      }
+      // Counter finished → run the CSS curtain, then take it out of the layer.
+      intro.classList.add('is-done');
+      window.setTimeout(() => {
+        window.clearTimeout(safety);
+        remove();
+      }, WIPE);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  onReady(initIntro);
+</script>

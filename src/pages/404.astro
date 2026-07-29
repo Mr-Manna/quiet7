@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Not found" description="This page doesn’t exist.">
+  <section class="container-x flex min-h-[80svh] flex-col justify-center">
+    <p class="eyebrow mb-6"><span class="h-px w-8 bg-muted"></span>404</p>
+    <h1 class="text-display-lg font-bold" data-statement>This page went quiet.</h1>
+    <p class="mt-6 max-w-md text-lg text-muted">
+      The page you’re after doesn’t exist — or has moved somewhere calmer.
+    </p>
+    <div class="mt-10 flex flex-wrap gap-3">
+      <a href="/" class="btn-primary">Back home</a>
+      <a href="/work" class="btn-outline">See our work</a>
+    </div>
+  </section>
+</BaseLayout>

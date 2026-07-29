@@ -1,0 +1,32 @@
+---
+// [BRACKETED] label (Image 1). Accent brackets + optional scramble-in
+// (handled by the homepage script targeting [data-scramble]).
+interface Props {
+  text: string;
+  scramble?: boolean;
+  class?: string;
+}
+const { text, scramble = true, class: className = '' } = Astro.props;
+---
+
+<span class={`brk ${className}`}>
+  <span class="brk__b" aria-hidden="true">[</span>
+  <span class="brk__t" data-scramble={scramble ? '' : undefined}>{text}</span>
+  <span class="brk__b" aria-hidden="true">]</span>
+</span>
+
+<style>
+  .brk {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.1em;
+    font-family: 'Space Grotesk Variable', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    line-height: 1;
+  }
+  .brk__b {
+    color: rgb(var(--color-accent-text));
+  }
+</style>

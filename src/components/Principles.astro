@@ -1,0 +1,69 @@
+---
+import Reveal from './Reveal.astro';
+import SectionHeading from './SectionHeading.astro';
+import Icon from './Icon.astro';
+import { principles } from '../data/principles';
+
+const pad = (n: number) => String(n + 1).padStart(2, '0');
+---
+
+<section class="container-x section border-t border-line">
+  <div class="mb-14 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+    <SectionHeading
+      index="03"
+      eyebrow="UX psychology"
+      title="We design for how minds actually work."
+    />
+    <Reveal>
+      <p class="max-w-xs text-muted">
+        Great communication isn’t decoration — it’s cognitive science. A few of the laws
+        we build with.
+      </p>
+    </Reveal>
+  </div>
+
+  <!-- Swiss modular grid: hairline dividers, sharp corners, numbered items -->
+  <div class="grid gap-px border border-line bg-line md:grid-cols-2 lg:grid-cols-3">
+    {
+      principles.map((p, i) => (
+        <Reveal>
+          <article class="principle group flex h-full flex-col bg-bg p-8 md:p-10">
+            <div class="flex items-start justify-between">
+              <span class="index-num text-lg">{pad(i)}</span>
+              <span class="principle__icon">
+                <Icon name={p.icon} class="h-6 w-6" />
+              </span>
+            </div>
+            <p class="mt-10 text-xs font-medium uppercase tracking-[0.18em] text-muted">{p.law}</p>
+            <h3 class="mt-2 text-display-sm font-bold">{p.headline}</h3>
+            <p class="mt-4 text-muted">{p.blurb}</p>
+          </article>
+        </Reveal>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .principle {
+    transition: background-color 0.4s ease;
+  }
+  .principle:hover {
+    background-color: rgb(var(--color-surface));
+  }
+  .principle__icon {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid rgb(var(--color-line));
+    color: rgb(var(--color-ink));
+    transition:
+      color 0.4s ease,
+      border-color 0.4s ease;
+  }
+  .principle:hover .principle__icon {
+    color: rgb(var(--color-accent-text));
+    border-color: rgb(var(--color-accent-text));
+  }
+</style>

@@ -1,0 +1,41 @@
+# Quiet Seven — Digital Communication Studio
+
+Quiet Seven is a digital communication studio crafting brands, digital experiences, and the software that carries them. Considered, restrained, built to last.
+
+## Core pages
+
+- Home: /
+- Work (case studies): /work
+- Services: /services
+- Journal (articles): /journal
+- Studio / About: /about
+- Contact: /contact
+
+## Work case studies
+
+- Atlas Mobility — shared-mobility platform: /work/atlas-mobility
+- Cadence Health — health-tech brand: /work/cadence-health
+- LedgerLine — fintech dashboard: /work/ledgerline
+- Northwind — e-commerce re-platform: /work/northwind
+
+## Services
+
+1. Brand & Identity — strategy, visual identity, naming, guidelines, art direction
+2. Digital & Product Design — UX research, web & marketing sites, product UI, design systems, motion
+3. Development — web dev, native & cross-platform apps, headless CMS & commerce, APIs, performance & accessibility
+
+## Journal
+
+- Colour as Language: /journal/colour-as-language
+- Designing for How We Read: /journal/designing-for-how-we-read
+- The Quiet Power of Whitespace: /journal/the-quiet-power-of-whitespace
+- Why the Grid Still Wins: /journal/why-the-grid-still-wins
+
+## Design principles
+
+Hick's Law, Fitts's Law, Jakob's Law, Miller's Law, Von Restorff Effect, Aesthetic–Usability Effect.
+
+## Contact
+
+Email: hello@quietseven.com
+Location: Remote-first · Kolkata / India

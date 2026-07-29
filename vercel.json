@@ -1,0 +1,51 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'sha256-0rMliM49uWQ81i+xjCnDSXDcD3/GiE3VeylsSBsBgHA=' 'sha256-EYExmhF4ulda8cNoRDFEd8dYSh9ITYRjphqrMXSIo5k=' 'sha256-a2K/HwxwqvIJ0JbSTQK/9DwYlwFg0XOrFEeFlDQ+d9Y=' 'sha256-jp9m/KJR6KhIvPfJvQ5J7y/SG+8E5ioncm81UkZWw84=' 'sha256-m5ktFNl66ePM7NPqFgc1FFrBwfMRkFhbaIugh9pZtoE=' 'sha256-xnV46+POQjWllcgVsGwC3fbaa39mfFBE94RR7m0HUFY=' 'sha256-yMqdcnQx8Hgn1dKdLjaHtobwAjXq8ogaVzTvwQIM09E='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'self' mailto:; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Resource-Policy",
+          "value": "same-origin"
+        }
+      ]
+    },
+    {
+      "source": "/_astro/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
+}

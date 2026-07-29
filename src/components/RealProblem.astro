@@ -1,0 +1,145 @@
+---
+import Reveal from './Reveal.astro';
+import BracketLabel from './BracketLabel.astro';
+---
+
+<section class="container-x section border-t border-line rp">
+  <div class="max-w-5xl">
+    <Reveal class="rp__eyebrow"><BracketLabel text="The real problem" /></Reveal>
+    <p class="statement rp__statement" data-statement>
+      Most businesses don’t have a product problem. They have a communication problem.
+    </p>
+  </div>
+
+  <!-- Bento grid: 2 + 1 / 1 + 1 + 1 (Swiss modular, hairline dividers) -->
+  <div class="rp__grid">
+    <Reveal class="rp__cell rp__cell--wide">
+      <article class="rp__inner rp__inner--dark">
+        <span class="rp__label"><span class="rp__no">01</span> Customers</span>
+        <p class="rp__stmt">Can’t buy what they don’t understand.</p>
+      </article>
+    </Reveal>
+
+    <Reveal class="rp__cell">
+      <article class="rp__inner rp__inner--accent">
+        <span class="rp__label">The fix</span>
+        <p class="rp__stmt">Clarity is the strategy.</p>
+      </article>
+    </Reveal>
+
+    <Reveal class="rp__cell">
+      <article class="rp__inner">
+        <span class="rp__label"><span class="rp__no">02</span> Investors</span>
+        <p class="rp__stmt">Don’t support what they can’t explain.</p>
+      </article>
+    </Reveal>
+
+    <Reveal class="rp__cell">
+      <article class="rp__inner">
+        <span class="rp__label"><span class="rp__no">03</span> Teams</span>
+        <p class="rp__stmt">Don’t execute what isn’t clearly communicated.</p>
+      </article>
+    </Reveal>
+
+    <Reveal class="rp__cell">
+      <article class="rp__inner">
+        <span class="rp__label"><span class="rp__no">04</span> Talent</span>
+        <p class="rp__stmt">Won’t join a mission they can’t picture.</p>
+      </article>
+    </Reveal>
+  </div>
+</section>
+
+<style>
+  .rp__eyebrow { margin-bottom: 1.5rem; font-size: 0.8rem; }
+  .rp__title {
+    font-family: 'Space Grotesk Variable', sans-serif;
+    font-weight: 700;
+    font-size: clamp(2.25rem, 6vw, 5rem);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+  .rp__title em {
+    font-style: normal;
+    background: rgb(var(--color-accent));
+    color: rgb(var(--forest));
+    padding: 0 0.1em;
+    border-radius: 5px;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  .rp__statement { margin-top: 1.75rem; }
+
+  .rp__grid {
+    display: grid;
+    gap: 1px;
+    margin-top: clamp(2.5rem, 5vw, 3.5rem);
+    border: 1px solid rgb(var(--color-line));
+    background: rgb(var(--color-line));
+  }
+  @media (min-width: 768px) {
+    .rp__grid { grid-template-columns: repeat(3, 1fr); grid-auto-rows: 1fr; }
+    .rp__cell--wide { grid-column: span 2; }
+  }
+
+  .rp__inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    min-height: 17rem;
+    padding: clamp(1.75rem, 3vw, 3rem);
+    background: rgb(var(--color-bg));
+    color: rgb(var(--color-ink));
+    transition:
+      background-color 0.4s ease,
+      filter 0.4s ease;
+  }
+  /* Dark panel: restore the BRIGHT lime for accent text (7.3:1 on forest).
+     The deepened accent-text token is for light backgrounds only. */
+  .rp__inner--dark { --color-accent-text: var(--color-accent); }
+
+  .rp__inner--dark {
+    background: rgb(var(--forest));
+    color: rgb(var(--forest-ink));
+  }
+  .rp__inner--accent {
+    background: rgb(var(--color-accent));
+    color: rgb(var(--forest));
+  }
+
+  .rp__label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    opacity: 0.8;
+  }
+  .rp__no { color: rgb(var(--color-accent-text)); }
+  .rp__inner--dark .rp__no { color: rgb(var(--color-accent-text)); }
+
+  .rp__stmt {
+    margin-top: 2.5rem;
+    font-family: 'Space Grotesk Variable', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.35rem, 2.4vw, 2rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* ── Interactivity ── */
+  .rp__inner:hover { background: rgb(var(--color-surface)); }
+  .rp__inner--dark:hover { background: rgb(var(--forest)); filter: brightness(1.35); }
+  .rp__inner--accent:hover { background: rgb(var(--color-accent)); filter: brightness(1.06); }
+  .rp__inner:hover .rp__stmt { transform: translateX(0.6rem); }
+  .rp__inner:hover .rp__label { opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rp__stmt { transition: none; }
+  }
+</style>

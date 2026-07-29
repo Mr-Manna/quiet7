@@ -1,0 +1,44 @@
+---
+import Reveal from './Reveal.astro';
+import { services } from '../data/services';
+
+interface Props {
+  detailed?: boolean; // show capabilities + tools (used on /services)
+}
+const { detailed = false } = Astro.props;
+---
+
+<div class="container-x section border-t border-line">
+  {services.map((s) => (
+    <Reveal>
+      <article class="group grid gap-6 border-b border-line py-10 md:grid-cols-12 md:py-14">
+        <div class="flex items-baseline gap-4 md:col-span-4">
+          <span class="font-display text-sm text-muted">{s.no}</span>
+          <h3 class="text-display-sm font-bold transition-colors duration-300 group-hover:text-accent-text">
+            {s.title}
+          </h3>
+        </div>
+
+        <p class="text-muted md:col-span-5 md:text-lg">{s.summary}</p>
+
+        <div class="md:col-span-3">
+          {detailed ? (
+            <ul class="space-y-2 text-sm">
+              {s.capabilities.map((c) => (
+                <li class="flex items-start gap-2 text-muted">
+                  <span class="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-accent"></span>{c}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div class="flex flex-wrap gap-2">
+              {s.tools.map((t) => (
+                <span class="border border-line px-3 py-1 text-xs text-muted">{t}</span>
+              ))}
+            </div>
+          )}
+        </div>
+      </article>
+    </Reveal>
+  ))}
+</div>

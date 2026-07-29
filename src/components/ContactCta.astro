@@ -1,0 +1,104 @@
+---
+// Reusable contact CTA. Dark (ink) block with a Sunburst backdrop, a
+// bracket eyebrow and a big invitation. Token-based, so it adopts whatever
+// palette context it sits in (lime inside .hx, emerald elsewhere).
+import Sunburst from './Sunburst.astro';
+import BracketLabel from './BracketLabel.astro';
+import { site } from '../data/site';
+---
+
+<section class="cc" aria-labelledby="cc-title">
+  <div class="cc__bg" aria-hidden="true"><Sunburst class="cc__burst" rays={44} /></div>
+  <div class="container-x cc__inner">
+    <p class="cc__eyebrow"><BracketLabel text="Start a project" /></p>
+    <h2 id="cc-title" class="cc__title" data-reveal>
+      Let’s build something <em>quiet.</em>
+    </h2>
+    <div class="cc__foot">
+      <a href={`mailto:${site.email}`} class="cc__mail">{site.email}</a>
+      <a href="/contact" class="cc__btn" data-magnetic="0.3">Contact <span aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Dark panel: restore the BRIGHT lime for accent text (7.3:1 on forest).
+     The deepened accent-text token is for light backgrounds only. */
+  .cc { --color-accent-text: var(--color-accent); }
+
+  .cc {
+    position: relative;
+    overflow: hidden;
+    background: rgb(var(--forest));
+    color: rgb(var(--forest-ink));
+    padding-block: clamp(4rem, 10vw, 8rem);
+  }
+  .cc__bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.3;
+  }
+  .cc__burst {
+    position: absolute;
+    bottom: -14rem;
+    left: -8rem;
+    width: 34rem;
+    color: rgb(var(--color-accent-text));
+  }
+  .cc__inner {
+    position: relative;
+    z-index: 1;
+  }
+  .cc__eyebrow {
+    margin-bottom: 1.25rem;
+  }
+  .cc__title {
+    font-family: 'Space Grotesk Variable', sans-serif;
+    font-weight: 700;
+    font-size: clamp(2.5rem, 7vw, 6rem);
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+    max-width: 16ch;
+  }
+  .cc__title em {
+    font-style: normal;
+    color: rgb(var(--color-accent-text));
+  }
+  .cc__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+    padding-top: 1.5rem;
+    border-top: 1px solid rgb(var(--forest-ink) / 0.2);
+  }
+  .cc__mail {
+    font-family: 'Space Grotesk Variable', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.25rem, 3vw, 2rem);
+    letter-spacing: -0.02em;
+    transition: color 0.3s ease;
+  }
+  .cc__mail:hover {
+    color: rgb(var(--color-accent-text));
+  }
+  .cc__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.9rem 1.75rem;
+    background: rgb(var(--color-accent));
+    color: rgb(var(--forest));
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 6px;
+    will-change: transform;
+    transition: opacity 0.3s ease;
+  }
+  .cc__btn:hover {
+    opacity: 0.9;
+  }
+</style>

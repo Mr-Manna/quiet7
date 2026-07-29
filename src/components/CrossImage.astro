@@ -1,0 +1,46 @@
+---
+// Photo clipped into a rounded interlocking silhouette (Image 1).
+// A real <img> is clipped by an inline SVG <clipPath> built from a UNION
+// of rounded <rect>s (objectBoundingBox units) — reliable rendering for
+// both raster and SVG sources.
+interface Props {
+  src: string;
+  alt: string;
+  variant?: 'cross' | 'tee' | 'ell' | 'notch';
+  class?: string;
+}
+const { src, alt, variant = 'cross', class: className = '' } = Astro.props;
+const id = 'cm-' + Math.random().toString(36).slice(2, 9);
+
+// Fractions of the bounding box (0–1). Two overlapping rounded rects.
+const shapes: Record<string, { x: number; y: number; w: number; h: number }[]> = {
+  cross: [{ x: 0.3, y: 0, w: 0.4, h: 1 }, { x: 0, y: 0.31, w: 1, h: 0.38 }],
+  tee: [{ x: 0, y: 0, w: 1, h: 0.4 }, { x: 0.3, y: 0.31, w: 0.4, h: 0.69 }],
+  ell: [{ x: 0, y: 0, w: 0.52, h: 1 }, { x: 0, y: 0.58, w: 1, h: 0.42 }],
+  notch: [{ x: 0, y: 0, w: 1, h: 0.71 }, { x: 0, y: 0.62, w: 0.6, h: 0.38 }],
+};
+const rects = shapes[variant] ?? shapes.cross;
+---
+
+<div class={`cross-img ${className}`} data-cross>
+  <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+    <clipPath id={id} clipPathUnits="objectBoundingBox">
+      {rects.map((r) => <rect x={r.x} y={r.y} width={r.w} height={r.h} rx="0.05" ry="0.042" />)}
+    </clipPath>
+  </svg>
+  <img src={src} alt={alt} loading="lazy" decoding="async" style={`clip-path:url(#${id})`} />
+</div>
+
+<style>
+  .cross-img {
+    display: block;
+    width: 100%;
+  }
+  .cross-img img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 5 / 6;
+    object-fit: cover;
+    background: rgb(var(--color-surface));
+  }
+</style>

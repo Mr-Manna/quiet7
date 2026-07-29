@@ -1,0 +1,509 @@
+---
+import Logo from './Logo.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import { nav, site, socials } from '../data/site';
+
+const pathname = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === '/' ? pathname === '/' : pathname.startsWith(href);
+---
+
+<header id="site-nav" data-nav>
+  <!-- Top bar — sits at the top of the page and scrolls away (not fixed) -->
+  <div class="topbar">
+    <div class="topbar__inner container-x">
+      <Logo />
+
+      <div class="topbar__right">
+        <span
+          class="hidden items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-muted md:inline-flex"
+          data-status
+        >
+          <span class="relative flex h-2 w-2">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60"></span>
+            <span class="relative inline-flex h-2 w-2 rounded-full bg-accent"></span>
+          </span>
+          Available for projects
+        </span>
+
+        <ThemeToggle />
+
+        <button
+          type="button"
+          data-menu-toggle
+          class="menu-btn"
+          aria-expanded="false"
+          aria-controls="menu-overlay"
+          aria-label="Open menu"
+        >
+          <span class="text-sm font-medium" data-menu-label>Menu</span>
+          <span class="menu-btn__icon" aria-hidden="true">
+            <span class="menu-btn__bar" data-bar="top"></span>
+            <span class="menu-btn__bar" data-bar="bot"></span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating vertical bar — fades in on scroll -->
+  <div class="floatbar" data-floatbar>
+    <a href="/" class="floatbar__logo" aria-label={`${site.name} — home`}>Q</a>
+    <button
+      type="button"
+      data-menu-toggle
+      class="floatbar__btn"
+      aria-expanded="false"
+      aria-controls="menu-overlay"
+      aria-label="Open menu"
+    >
+      <span class="menu-btn__icon" aria-hidden="true">
+        <span class="menu-btn__bar" data-bar="top"></span>
+        <span class="menu-btn__bar" data-bar="bot"></span>
+      </span>
+    </button>
+    <ThemeToggle />
+  </div>
+
+  <!--
+    Fullscreen overlay. `inert` by default: clip-path hides it visually but does
+    NOT remove it from the tab order / a11y tree, so without this keyboard users
+    would tab through invisible menu links. JS removes `inert` on open.
+    (No-JS visitors reach every nav link via the footer.)
+  -->
+  <div
+    id="menu-overlay"
+    data-menu-overlay
+    class="menu-overlay fixed inset-0 z-40"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Main menu"
+    inert
+  >
+    <div class="container-x flex h-full flex-col justify-between gap-10 overflow-y-auto pb-12 pt-28">
+      <nav aria-label="Primary">
+        <ul class="flex flex-col">
+          {
+            nav.map((item, i) => (
+              <li class="reveal-line">
+                <a
+                  href={item.href}
+                  class="menu-link"
+                  aria-current={isActive(item.href) ? 'page' : undefined}
+                >
+                  <span class="menu-link__idx">0{i + 1}</span>
+                  <span class="menu-link__mask">
+                    <span class="menu-link__t">{item.label}</span>
+                    <span class="menu-link__t menu-link__t--dup" aria-hidden="true">{item.label}</span>
+                  </span>
+                  {isActive(item.href) && <span class="menu-link__dot" aria-hidden="true" />}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="grid gap-8 border-t border-white/12 pt-8 md:grid-cols-3">
+        <div data-fade>
+          <p class="mb-2 text-xs uppercase tracking-[0.2em] text-white/40">Get in touch</p>
+          <a href={`mailto:${site.email}`} class="link-underline text-lg">{site.email}</a>
+        </div>
+        <div data-fade>
+          <p class="mb-2 text-xs uppercase tracking-[0.2em] text-white/40">Elsewhere</p>
+          <ul class="flex flex-wrap gap-x-5 gap-y-1">
+            {socials.map((s) => (
+              <li>
+                <a href={s.href} target="_blank" rel="noopener noreferrer" class="link-underline text-white/70 hover:text-white">
+                  {s.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div data-fade class="md:text-right">
+          <p class="mb-2 text-xs uppercase tracking-[0.2em] text-white/40">Studio</p>
+          <p class="text-white/70">{site.location}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  /* Header sits at page top and scrolls away (absolute, not fixed). */
+  header#site-nav {
+    position: absolute;
+    inset: 0 0 auto 0;
+    z-index: 50;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    position: relative;
+    z-index: 60;
+  }
+  .topbar__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+  }
+  .topbar__right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  /* ── Floating vertical bar (fixed, appears on scroll) ── */
+  .floatbar {
+    position: fixed;
+    top: 50%;
+    right: clamp(0.9rem, 2vw, 1.75rem);
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem;
+    border-radius: 999px;
+    background: rgb(var(--color-surface) / 0.82);
+    border: 1px solid rgb(var(--color-line));
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(150%, -50%);
+    transition:
+      transform 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.4s ease;
+  }
+  .floatbar.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(0, -50%);
+  }
+  .floatbar__logo {
+    width: 2.4rem;
+    height: 2.4rem;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: rgb(var(--color-ink));
+    color: rgb(var(--color-bg));
+    font-family: 'Space Grotesk Variable', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
+  }
+  .floatbar__logo:hover {
+    background: rgb(var(--color-accent));
+    color: rgb(var(--forest));
+  }
+  .floatbar__btn {
+    width: 2.4rem;
+    height: 2.4rem;
+    display: grid;
+    place-items: center;
+    color: rgb(var(--color-ink));
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .floatbar {
+      transform: translate(0, -50%);
+      transition: opacity 0.3s ease;
+    }
+  }
+
+  /* ── Menu button ── */
+  .menu-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: rgb(var(--color-ink));
+    transition: color 0.4s ease;
+    will-change: transform;
+  }
+  .menu-btn__icon {
+    position: relative;
+    width: 26px;
+    height: 12px;
+  }
+  .menu-btn__bar {
+    position: absolute;
+    left: 0;
+    height: 2px;
+    width: 26px;
+    background: currentColor;
+    transition:
+      transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      width 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      top 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      bottom 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .menu-btn__bar[data-bar='top'] { top: 2px; }
+  .menu-btn__bar[data-bar='bot'] { bottom: 2px; width: 18px; margin-left: auto; right: 0; left: auto; }
+  .floatbar__btn .menu-btn__bar[data-bar='bot'] { width: 26px; }
+  .menu-btn:hover .menu-btn__bar[data-bar='bot'] { width: 26px; }
+  header.is-open .menu-btn__bar[data-bar='top'] { top: 5px; width: 24px; transform: rotate(45deg); }
+  header.is-open .menu-btn__bar[data-bar='bot'] { bottom: 5px; width: 24px; transform: rotate(-45deg); }
+
+  /* ── Open state (top-bar controls sit over the dark overlay) ── */
+  header.is-open [data-status] { opacity: 0; }
+  header.is-open .topbar .menu-btn { color: rgb(var(--forest-ink)); }
+  header.is-open .topbar :global(.site-logo) { color: rgb(var(--forest-ink)); }
+  header.is-open .topbar :global(.theme-toggle) { color: rgb(var(--forest-ink)); }
+
+  /* Dark panels: restore the BRIGHT lime for accent text (7.3:1 on forest).
+     The deepened accent-text token is for light backgrounds only. */
+  .menu-overlay,
+  header.is-open .topbar {
+    --color-accent-text: var(--color-accent);
+  }
+
+  /* ── Overlay (always a dark forest panel, both themes) ── */
+  .menu-overlay {
+    clip-path: inset(0 0 100% 0);
+    pointer-events: none;
+    will-change: clip-path;
+    background: rgb(var(--forest));
+    color: rgb(var(--forest-ink));
+
+    /* clip-path alone hides it visually but leaves a full-viewport forest layer
+       composited over the page. That costs paint on every frame, and contrast
+       checkers resolve the top bar against *it* rather than the hero — reporting
+       the dark logo as 1.17:1 dark-on-dark.
+       `visibility` takes it out of both. The delay keeps it visible for the
+       length of the close animation, then drops it. */
+    visibility: hidden;
+    transition: visibility 0s linear 0.8s;
+  }
+  header.is-open .menu-overlay {
+    visibility: visible;
+    transition-delay: 0s;
+  }
+  .menu-overlay > div {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .menu-overlay > div::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ── Menu links ── */
+  .reveal-line { overflow: hidden; }
+  .menu-link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: clamp(0.75rem, 2vw, 1.75rem);
+    padding: clamp(0.15rem, 1.1vh, 0.7rem) 0;
+    font-family: 'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+    font-size: clamp(2.75rem, 9vw, 7rem);
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    color: rgb(var(--forest-ink));
+    will-change: transform;
+  }
+  .menu-link__idx {
+    font-size: clamp(0.7rem, 1.3vw, 0.95rem);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: rgb(var(--color-accent-text));
+    align-self: flex-start;
+    margin-top: 0.5em;
+  }
+  .menu-link__mask {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    line-height: 1.1;
+  }
+  .menu-link__t {
+    display: block;
+    transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .menu-link__t--dup {
+    position: absolute;
+    inset: 0;
+    transform: translateY(110%);
+    color: rgb(var(--color-accent-text));
+  }
+  .menu-link:hover .menu-link__t:not(.menu-link__t--dup) { transform: translateY(-110%); }
+  .menu-link:hover .menu-link__t--dup { transform: translateY(0); }
+  .menu-link__dot {
+    align-self: center;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 9999px;
+    background: rgb(var(--color-accent));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .menu-link__t { transition: none; }
+    /* No close animation to wait out — drop the overlay immediately. */
+    .menu-overlay { transition-delay: 0s; }
+  }
+</style>
+
+<script>
+  // GSAP is NOT imported statically here — it would land on the critical path.
+  // The menu is fully functional without it (see the `tl === null` branches in
+  // openMenu/closeMenu, which fall back to a plain clip-path toggle). The
+  // timeline is built once the motion chunk arrives and simply upgrades it.
+  import { loadMotion, whenIdleOrIntent, onReady, type Motion } from '../scripts/motion';
+
+  let gsap: Motion['gsap'] | null = null;
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function initNav() {
+    const header = document.querySelector<HTMLElement>('[data-nav]');
+    if (!header || header.dataset.navReady) return;
+    header.dataset.navReady = '1';
+
+    const toggles = Array.from(header.querySelectorAll<HTMLButtonElement>('[data-menu-toggle]'));
+    const overlay = header.querySelector<HTMLElement>('[data-menu-overlay]');
+    const labels = Array.from(header.querySelectorAll<HTMLElement>('[data-menu-label]'));
+    const floatbar = header.querySelector<HTMLElement>('[data-floatbar]');
+    if (!toggles.length || !overlay) return;
+
+    const links = overlay.querySelectorAll<HTMLElement>('.menu-link');
+    const fades = overlay.querySelectorAll<HTMLElement>('[data-fade]');
+
+    let open = false;
+    let tl: any = null;
+
+    // Build the open/close timeline only once the motion chunk has loaded. If
+    // the user opens the menu before then, openMenu() takes the CSS fallback
+    // path — the menu always works, it just isn't animated yet.
+    function buildTimeline(g: Motion['gsap']) {
+      if (reduce || tl || open) return;
+      tl = g.timeline({ paused: true });
+      tl.to(overlay, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.85, ease: 'power4.inOut' })
+        .from(links, { yPercent: 120, duration: 0.7, stagger: 0.07, ease: 'power4.out' }, '-=0.4')
+        .from(fades, { y: 24, autoAlpha: 0, duration: 0.5, stagger: 0.08, ease: 'power2.out' }, '-=0.35');
+    }
+
+    whenIdleOrIntent(async () => {
+      const m = await loadMotion();
+      gsap = m.gsap;
+      buildTimeline(m.gsap);
+      initMagnetic();
+    });
+
+    const getLenis = () => (window as any).lenis;
+    function lock(state: boolean) {
+      if (state) { getLenis()?.stop(); document.documentElement.classList.add('overflow-hidden'); }
+      else { getLenis()?.start(); document.documentElement.classList.remove('overflow-hidden'); }
+    }
+
+    // ── A11y: focus management ────────────────────────────────────────────
+    // Without this, keyboard users tab straight past the open overlay into the
+    // page behind it.
+    const FOCUSABLE =
+      'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    let lastFocused: HTMLElement | null = null;
+
+    // Hide the rest of the page from AT + tab order while the menu is open.
+    const background = () =>
+      Array.from(document.querySelectorAll<HTMLElement>('main, footer, .cc'));
+    function setBackgroundInert(state: boolean) {
+      background().forEach((el) => {
+        if (state) el.setAttribute('inert', '');
+        else el.removeAttribute('inert');
+      });
+    }
+
+    function onTrapKeydown(e: KeyboardEvent) {
+      if (e.key !== 'Tab' || !open) return;
+      const items = Array.from(overlay!.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
+        (el) => el.offsetParent !== null || el === document.activeElement
+      );
+      // The toggles sit visually above the overlay, so keep them in the loop.
+      const focusables = [...items, ...toggles];
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    function openMenu() {
+      open = true;
+      lastFocused = document.activeElement as HTMLElement;
+      overlay.style.pointerEvents = 'auto';
+      header!.classList.add('is-open');
+      toggles.forEach((t) => { t.setAttribute('aria-expanded', 'true'); t.setAttribute('aria-label', 'Close menu'); });
+      labels.forEach((l) => (l.textContent = 'Close'));
+      lock(true);
+      overlay.removeAttribute('inert'); // make the menu reachable
+      setBackgroundInert(true);
+      document.addEventListener('keydown', onTrapKeydown);
+      // Move focus into the overlay so a screen reader lands in the menu.
+      overlay.querySelector<HTMLElement>(FOCUSABLE)?.focus();
+      if (tl) tl.timeScale(1).play();
+      else overlay.style.clipPath = 'inset(0 0 0 0)';
+    }
+
+    function closeMenu() {
+      open = false;
+      header!.classList.remove('is-open');
+      toggles.forEach((t) => { t.setAttribute('aria-expanded', 'false'); t.setAttribute('aria-label', 'Open menu'); });
+      labels.forEach((l) => (l.textContent = 'Menu'));
+      overlay.setAttribute('inert', ''); // back out of the tab order
+      setBackgroundInert(false);
+      document.removeEventListener('keydown', onTrapKeydown);
+      // Return focus to whatever opened the menu.
+      (lastFocused ?? toggles[0])?.focus();
+      if (tl) {
+        tl.timeScale(1.6);
+        tl.eventCallback('onReverseComplete', () => { overlay.style.pointerEvents = 'none'; lock(false); });
+        tl.reverse();
+      } else {
+        overlay.style.clipPath = 'inset(0 0 100% 0)';
+        overlay.style.pointerEvents = 'none';
+        lock(false);
+      }
+    }
+
+    toggles.forEach((t) => t.addEventListener('click', () => (open ? closeMenu() : openMenu())));
+    overlay.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => open && closeMenu()));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) closeMenu(); });
+
+    // Floating bar visibility on scroll
+    const onScroll = () => floatbar?.classList.toggle('is-visible', window.scrollY > 120);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Magnetic on menu toggles (fine pointers, motion only).
+    // Called from whenIdleOrIntent() once `gsap` is available.
+    function initMagnetic() {
+      if (reduce || !gsap || !window.matchMedia('(pointer: fine)').matches) return;
+      const g = gsap;
+      toggles.forEach((toggle) => {
+        const strength = 0.35;
+        toggle.addEventListener('mousemove', (e) => {
+          const r = toggle.getBoundingClientRect();
+          g.to(toggle, {
+            x: (e.clientX - (r.left + r.width / 2)) * strength,
+            y: (e.clientY - (r.top + r.height / 2)) * strength,
+            duration: 0.4, ease: 'power3.out',
+          });
+        });
+        toggle.addEventListener('mouseleave', () =>
+          g.to(toggle, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.4)' })
+        );
+      });
+    }
+  }
+
+  onReady(initNav);
+</script>

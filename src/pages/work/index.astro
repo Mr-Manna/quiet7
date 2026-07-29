@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import WorkGrid from '../../components/WorkGrid.astro';
+import Reveal from '../../components/Reveal.astro';
+
+const projects = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<BaseLayout title="Work" description="Selected branding, design and development projects by quiet seven.">
+  <section class="container-x pt-40 pb-16 md:pt-48">
+    <Reveal class="eyebrow mb-6"><span class="h-px w-8 bg-muted"></span>Selected work</Reveal>
+    <h1 class="max-w-4xl text-display-lg font-bold" data-statement>
+      Brands and products we’ve shaped, end to end.
+    </h1>
+  </section>
+
+  <section class="container-x section border-t border-line">
+    <Reveal class="mb-10 flex items-baseline justify-between">
+      <span class="flex items-center gap-3">
+        <span class="index-num">01</span>
+        <span class="h-3 w-px bg-line" aria-hidden="true"></span>
+        <span class="eyebrow">All projects</span>
+      </span>
+      <span class="tabular-nums text-sm text-muted">{String(projects.length).padStart(2, '0')} projects</span>
+    </Reveal>
+    <WorkGrid projects={projects} />
+  </section>
+</BaseLayout>

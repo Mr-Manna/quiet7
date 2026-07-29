@@ -1,0 +1,16 @@
+---
+import { marqueeItems } from '../data/testimonials';
+// Repeated twice so the -100% keyframe loops seamlessly.
+const items = [...marqueeItems, ...marqueeItems];
+---
+
+<div class="marquee border-y border-line py-6 select-none">
+  <div class="marquee__track" aria-hidden="true">
+    {items.map((item) => (
+      <span class="flex items-center">
+        <span class="px-8 font-display text-2xl lowercase tracking-tight text-muted md:text-3xl">{item}</span>
+        <span class="h-1.5 w-1.5 rounded-full bg-accent"></span>
+      </span>
+    ))}
+  </div>
+</div>

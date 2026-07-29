@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1200">
+  <rect width="1600" height="1200" fill="#efe9fc"/>
+  <circle cx="1180" cy="360" r="360" fill="#7c3aed" opacity="0.9"/>
+  <rect x="180" y="720" width="620" height="300" rx="150" fill="#0e0e0e"/>
+  <rect x="180" y="200" width="360" height="360" rx="24" fill="none" stroke="#0e0e0e" stroke-width="10"/>
+  <path d="M540 380 H900" stroke="#0e0e0e" stroke-width="10"/>
+  <text x="120" y="1120" font-family="'Space Grotesk', sans-serif" font-size="90" font-weight="600" fill="#0e0e0e" letter-spacing="-3">Ledgerline</text>
+</svg>

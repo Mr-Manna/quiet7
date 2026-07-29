@@ -1,0 +1,351 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ──────────────────────────────────────────────────────────────
+   Brand tokens — the single source of truth for colour.
+   Change these six values to rebrand the entire site.
+   ────────────────────────────────────────────────────────────── */
+/* Values are RGB channel triplets (not hex) so Tailwind can apply opacity
+   modifiers like `bg-bg/80`. Convert any new hex to "r g b".
+   Light is the default; [data-theme='dark'] overrides for dark mode. */
+:root {
+  color-scheme: light;
+  --color-bg: 244 245 238; /* #f4f5ee warm off-white */
+  --color-surface: 255 255 255; /* #ffffff cards / raised surfaces */
+  --color-ink: 15 24 18; /* #0f1812 near-black green text */
+  --color-muted: 98 110 98; /* secondary text */
+  --color-line: 216 222 208; /* hairline borders */
+  --color-accent: 141 199 20; /* #8dc714 lime — FILLS / blocks / borders only */
+  /* Accent applied to TEXT or ICONS must use this. The bright lime is only
+     1.86:1 on the light bg — nowhere near WCAG AA. This deepened lime is
+     5.54:1 on --color-bg and 6.08:1 on --color-surface. */
+  --color-accent-text: 76 108 9; /* #4c6c09 */
+  --forest: 15 42 27; /* #0f2a1b dark panels (CTA, forest sections) */
+  --forest-ink: 228 240 214; /* light text on forest / dark surfaces */
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-bg: 12 17 13; /* #0c110d near-black green */
+  --color-surface: 22 29 23; /* #161d17 raised */
+  --color-ink: 231 238 222; /* #e7eede off-white text */
+  --color-muted: 138 150 132; /* secondary text */
+  --color-line: 40 50 41; /* hairline borders */
+  --color-accent: 166 224 46; /* #a6e02e brighter lime for dark */
+  /* On dark, the bright lime is already 12.09:1 — no separate text token needed. */
+  --color-accent-text: 166 224 46;
+  --forest: 20 30 22; /* lifted dark-green panel (stands off the bg) */
+  --forest-ink: 228 240 214; /* light text on forest */
+}
+
+/* Smooth colour crossfade while switching themes (toggled by ThemeToggle). */
+.theme-transition,
+.theme-transition * {
+  transition:
+    background-color 0.4s ease,
+    border-color 0.4s ease,
+    color 0.4s ease,
+    fill 0.4s ease !important;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+    /* Hide the page scrollbar chrome (scrolling still works). */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* legacy Edge */
+  }
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none; /* Chrome / Safari / WebKit */
+  }
+
+  /* Lenis manages scrolling; disable native smooth to avoid conflict */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
+  body {
+    @apply bg-bg text-ink font-sans antialiased;
+    font-feature-settings: 'ss01', 'cv01';
+  }
+
+  /* Dark forest on lime = 7.54:1 (white-on-lime was only 2.04:1). */
+  ::selection {
+    background: rgb(var(--color-accent));
+    color: rgb(var(--forest));
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display;
+    text-wrap: balance;
+  }
+
+  /* Focus visibility for keyboard users */
+  :focus-visible {
+    outline: 2px solid rgb(var(--color-accent));
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-[95rem] px-6 md:px-10;
+  }
+
+  .section {
+    @apply py-20 md:py-32;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-muted;
+  }
+
+  /* Swiss hairline rule — grid-aligned divider used across sections. */
+  .rule {
+    @apply block h-px w-full bg-line;
+  }
+
+  /* Numbered chapter index (accent, tabular).
+     Uses the token directly rather than `@apply text-accent-text` — @apply of a
+     config-defined colour breaks until the dev server reloads tailwind.config. */
+  .index-num {
+    @apply font-display text-sm font-bold tabular-nums;
+    color: rgb(var(--color-accent-text));
+  }
+
+  /* Any display-size text renders in the display face (Space Grotesk),
+     regardless of the element tag it sits on. */
+  [class*='text-display-'] {
+    @apply font-display;
+  }
+
+  .link-underline {
+    @apply relative inline-block;
+  }
+  .link-underline::after {
+    content: '';
+    @apply absolute bottom-0 left-0 h-px w-full origin-right scale-x-0 bg-current transition-transform duration-500 ease-smooth;
+  }
+  .link-underline:hover::after {
+    @apply origin-left scale-x-100;
+  }
+
+  /* Swiss: rectangular buttons, no pill radius. */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-medium transition-all duration-300 ease-smooth;
+  }
+  .btn-primary {
+    @apply btn bg-ink text-bg hover:bg-accent;
+  }
+  .btn-outline {
+    @apply btn border border-line text-ink hover:border-ink;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Reveal animation base state.
+   GSAP flips these to visible; if JS/anim is unavailable or the
+   user prefers reduced motion, content stays fully visible.
+   ────────────────────────────────────────────────────────────── */
+/* Only hide reveal content when JS is actually available to reveal it again.
+   `html.js` is set by the inline head script. Without this gate, a JS failure
+   (or a no-JS user) leaves every revealed section permanently invisible. */
+html.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  will-change: opacity, transform;
+}
+
+/* Preloader already played this session → hide it before paint (no flash on
+   navigation or reload). The class is set by BaseLayout's inline head script. */
+html.intro-seen #intro {
+  display: none !important;
+}
+
+/* Big statement type. Pair with [data-statement] for the per-word reveal.
+   (The reveal itself is unpinned — it never lengthens the page.) */
+.statement {
+  max-width: 60rem;
+  font-family: 'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.6rem, 4.2vw, 3.4rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+/* Reveal progress for the scrubbed word animation, 0 (muted) → 1 (ink).
+   Typed via @property so the browser can interpolate it as a number rather than
+   an opaque string. Defaults to 1: if JS never runs, the words are fully legible. */
+@property --lit {
+  syntax: '<number>';
+  initial-value: 1;
+  inherits: false;
+}
+
+/* Word spans injected at runtime by setupStatements().
+   `display: inline` is load-bearing: an inline-block would change line-breaking
+   when the spans are injected after paint, and that reflow counts as CLS.
+
+   The reveal ramps colour (muted -> ink), not opacity. A dim opacity reads as
+   ~1.33:1 to a contrast checker and to a real reader who hasn't scrolled there
+   yet; muted is 4.88:1, so the un-revealed state is still legible text. */
+.statement-word {
+  display: inline;
+  color: rgb(var(--color-muted));
+  will-change: color;
+}
+.statement-word.is-lit {
+  color: rgb(var(--color-ink));
+}
+
+/* Kinetic word-reveal (GSAP splits headings into these). */
+.word-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.08em;
+}
+.word-inner {
+  display: inline-block;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .marquee__track {
+    animation: none !important;
+  }
+}
+
+/* Marquee ticker */
+.marquee {
+  @apply flex overflow-hidden whitespace-nowrap;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.marquee__track {
+  @apply flex shrink-0 items-center;
+  animation: marquee 32s linear infinite;
+}
+.marquee:hover .marquee__track {
+  animation-play-state: paused;
+}
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Scroll progress bar
+   ────────────────────────────────────────────────────────────── */
+.scroll-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 55;
+  height: 2px;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: rgb(var(--color-accent));
+  pointer-events: none;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Custom cursor (fine pointers + motion only; JS-driven)
+   ────────────────────────────────────────────────────────────── */
+[data-magnetic],
+.btn,
+.menu-btn {
+  will-change: transform;
+}
+
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  pointer-events: none;
+  border-radius: 9999px;
+  opacity: 0;
+}
+.cursor-dot {
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  background: rgb(var(--color-accent));
+  transition: opacity 0.25s ease;
+}
+.cursor-ring {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  margin: -21px 0 0 -21px;
+  border: 1.5px solid rgb(var(--color-accent));
+  transition:
+    opacity 0.3s ease,
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+.cursor-ring__label {
+  font-family: theme('fontFamily.sans');
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.is-cursor-active .cursor-dot,
+.is-cursor-active .cursor-ring {
+  opacity: 1;
+}
+.cursor-ring.is-hover {
+  background: rgb(var(--color-accent));
+  border-color: rgb(var(--color-accent-text));
+  mix-blend-mode: difference;
+}
+.cursor-ring.is-label .cursor-ring__label {
+  opacity: 1;
+}
+.cursor-dot.is-hover {
+  opacity: 0;
+}
+
+/* A11y: the native cursor is NEVER hidden. The custom cursor is purely an
+   additive enhancement layered on top — hiding `cursor` removes an essential
+   affordance (and breaks pointer users who rely on the system cursor size /
+   high-contrast cursor settings). Formerly `.cursor-none { cursor: none }`. */
+
+@media (hover: none), (pointer: coarse) {
+  .cursor-dot,
+  .cursor-ring {
+    display: none !important;
+  }
+}

@@ -1,0 +1,112 @@
+---
+import { stats } from '../data/stats';
+
+const pad = (i: number) => String(i + 1).padStart(2, '0');
+const show = (s: (typeof stats)[number]) =>
+  (Number.isInteger(s.value) ? s.value : s.value.toFixed(1)) + s.suffix;
+---
+
+{/* Dark forest panel — the same emphasis motif as RealProblem / HowWeBuild /
+    ContactCta. These numbers used to be hairline-ruled columns sitting on the
+    page background, which read as a footnote; on forest with oversized lime
+    numerals they carry the weight the section heading promises.
+
+    A <dl> is the honest semantic here: each label defines its figure. Note the
+    DOM order is label-then-figure (so a screen reader says "Projects shipped,
+    120+"), while CSS `order` paints the figure on top. A dl > div may contain
+    only dt and dd, so the index is a ::after with content: attr(), not a span. */}
+<div class="stats">
+  <dl class="stats__grid">
+    {stats.map((s, i) => (
+      <div class="stats__cell" data-reveal data-reveal-delay={i * 0.06} data-idx={pad(i)}>
+        <dt class="stats__label">{s.label}</dt>
+        <dd class="stats__num">
+          {/* The real figure is rendered server-side; the count-up in BaseLayout
+              zeroes it and animates up only once it knows JS is alive. So a
+              no-JS visitor reads "120+", not "0+". */}
+          <span data-count={s.value} data-count-suffix={s.suffix}>{show(s)}</span>
+        </dd>
+      </div>
+    ))}
+  </dl>
+</div>
+
+<style>
+  .stats {
+    /* Accent as TEXT on this panel: the deepened --color-accent-text is tuned
+       for the light page background and is unreadable on forest. The bright
+       lime is 7.54:1 here (10.86:1 in dark theme). */
+    --color-accent-text: var(--color-accent);
+
+    background: rgb(var(--forest));
+    color: rgb(var(--forest-ink));
+    padding: clamp(2rem, 5vw, 4rem) clamp(1.25rem, 4vw, 3.5rem);
+  }
+
+  .stats__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(2.25rem, 4vw, 3rem) 0;
+    margin: 0;
+  }
+  @media (min-width: 900px) {
+    .stats__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .stats__cell {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding-left: clamp(1rem, 2.5vw, 2rem);
+  }
+  /* A rule between columns, not a box around them. */
+  .stats__cell::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgb(var(--forest-ink) / 0.18);
+  }
+  /* The 01–04 index. `order: -1` lifts it above the figure; pseudo-elements are
+     flex items, so this works without adding an element the <dl> can't hold. */
+  .stats__cell::after {
+    content: attr(data-idx);
+    order: -1;
+    margin-bottom: 0.9rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    color: rgb(var(--color-accent-text));
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stats__num {
+    order: 0;
+    margin: 0;
+    font-family: 'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
+    /* Deliberately oversized — being noticed is the entire point of the block. */
+    font-size: clamp(2.75rem, 6.5vw, 5.25rem);
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    color: rgb(var(--color-accent-text));
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stats__label {
+    order: 1;
+    margin-top: 0.85rem;
+    max-width: 12rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    /* 7.08:1 on forest. */
+    color: rgb(var(--forest-ink) / 0.7);
+  }
+</style>

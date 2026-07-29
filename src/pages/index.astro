@@ -1,0 +1,665 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BracketLabel from '../components/BracketLabel.astro';
+import HeroCanvas from '../components/HeroCanvas.astro';
+import CrossImage from '../components/CrossImage.astro';
+import HowWeBuild from '../components/HowWeBuild.astro';
+import Principles from '../components/Principles.astro';
+import StatsBlock from '../components/StatsBlock.astro';
+import SiteQuality from '../components/SiteQuality.astro';
+import RealProblem from '../components/RealProblem.astro';
+import { getCollection } from 'astro:content';
+import { services } from '../data/services';
+import { marqueeItems, testimonials } from '../data/testimonials';
+import { site } from '../data/site';
+
+const projects = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+const articles = (await getCollection('journal'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+const fmtDate = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+const [leadQuote, ...restQuotes] = testimonials;
+const pad = (n: number) => String(n + 1).padStart(2, '0');
+const total = pad(projects.length - 1);
+
+const manifesto =
+  'Most work shouts. The best work is understood. We build brands, interfaces and software that remove friction, earn trust, and disappear into the experience.';
+const marq = [...marqueeItems, ...marqueeItems];
+const crossVariants = ['cross', 'tee', 'ell', 'notch'] as const;
+
+const process = [
+  { n: '01', label: 'Discover', body: 'We start with the business, not the pixels — research, interviews, and a shared definition of what success looks like.' },
+  { n: '02', label: 'Define', body: 'Strategy becomes direction. We explore widely, then narrow fast against real constraints.' },
+  { n: '03', label: 'Design', body: 'Design and engineering move together from day one, so what we show is what we can ship.' },
+  { n: '04', label: 'Deliver', body: 'We launch, measure and refine. Good work is never finished — it earns its keep over time.' },
+];
+---
+
+<BaseLayout>
+  {/* Preloader now lives in BaseLayout, so it runs on every page. */}
+  <div class="hx" data-home>
+    <!-- ══ HERO ══ -->
+    <section class="hx-hero" data-hero>
+      <HeroCanvas />
+
+      <div class="container-x hx-hero__inner">
+        <p class="hx-hero__kicker" data-hero-fade><BracketLabel text="Digital communication studio" /></p>
+        <h1 class="hx-hero__title" data-hero-parallax>
+          <span class="k-line"><span class="k-line__i" data-hero-line-inner>We turn complexity</span></span>
+          <span class="k-line"><span class="k-line__i" data-hero-line-inner>into <em>clarity.</em></span></span>
+        </h1>
+        <p class="hx-hero__lead" data-hero-fade>{site.description}</p>
+      </div>
+
+      <div class="container-x hx-hero__actions" data-hero-fade>
+        <span class="hx-scroll" aria-hidden="true">
+          <span>Scroll</span>
+          <span class="hx-scroll__line"></span>
+        </span>
+        <a href="/contact" class="hx-btn" data-magnetic="0.3">Start a project →</a>
+      </div>
+
+      <div class="container-x hx-hero__bar" data-hero-fade>
+        <span class="hx-spec"><BracketLabel text="Studio" scramble={false} /> quiet seven</span>
+        <span class="hx-spec"><BracketLabel text="Focus" scramble={false} /> Brand · Web · Build</span>
+        <span class="hx-spec hx-spec--status"><span class="hx-dot"></span> Available for 2026</span>
+        <span class="hx-spec"><BracketLabel text="Local" scramble={false} /> <b data-clock>--:--:--</b></span>
+      </div>
+    </section>
+
+    <!-- ══ MARQUEE ══
+         WCAG 2.2.2: content that moves for >5s needs a mechanism to pause it.
+         Hover-pause alone is not keyboard accessible, hence the real button. -->
+    <div class="hx-marq" data-marq>
+      <div class="hx-marq__track" data-marq-track aria-hidden="true">
+        {marq.map((item) => (<span class="hx-marq__item">{item} <i>✦</i></span>))}
+      </div>
+      <button type="button" class="hx-marq__pause" data-marq-pause aria-pressed="false">
+        <span class="hx-marq__pause-icon" aria-hidden="true"></span>
+        <span class="sr-only" data-marq-pause-label>Pause scrolling text</span>
+      </button>
+    </div>
+    <RealProblem/>
+    <!-- ══ MANIFESTO ══ -->
+    <section class="hx-manifesto" data-manifesto>
+      <div class="container-x">
+        <p class="hx-eyebrow"><BracketLabel text="Belief" /></p>
+        <p class="hx-manifesto__text">
+          {manifesto.split(' ').map((w) => (<span data-mword>{w} </span>))}
+        </p>
+      </div>
+    </section>
+
+    <!-- ══ HOW WE BUILD ══ -->
+    <HowWeBuild />
+
+    <!-- ══ SERVICES ══ -->
+    <section class="container-x section">
+      <p class="hx-eyebrow mb-10"><BracketLabel text="Capabilities" /></p>
+      <div class="hx-srv-list">
+        {services.map((s) => (
+          <a href="/services" class="hx-srv" data-reveal data-cursor-label="More">
+            <span class="hx-srv__no">{s.no}</span>
+            <span class="hx-srv__title">{s.title}</span>
+            <span class="hx-srv__desc">{s.summary}</span>
+            <span class="hx-srv__tags">{s.tools.slice(0, 3).map((t) => <BracketLabel text={t} scramble={false} />)}</span>
+            <span class="hx-srv__arrow" aria-hidden="true">↗</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- ══ UX PSYCHOLOGY ══ -->
+    <Principles />
+
+    <!-- ══ PROCESS ══ -->
+    <section class="container-x section border-t border-line">
+      <div class="hx-proc-head">
+        <p class="hx-eyebrow"><BracketLabel text="Process" /></p>
+        <h2 class="hx-h2" data-words>A calm, deliberate way of working.</h2>
+      </div>
+      <div class="hx-proc">
+        {process.map((step) => (
+          <div class="hx-proc__step" data-reveal>
+            <span class="hx-proc__no">{step.n}</span>
+            <h3 class="hx-proc__title">{step.label}</h3>
+            <p class="hx-proc__body">{step.body}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- ══ STATS ══ -->
+    <section class="container-x section border-t border-line">
+      <div class="hx-stats-head">
+        <p class="hx-eyebrow"><BracketLabel text="By the numbers" /></p>
+        <h2 class="hx-h2" data-words>A decade of quiet output.</h2>
+      </div>
+      <StatsBlock />
+    </section>
+
+    <!-- ══ HORIZONTAL WORK ══ -->
+    <section class="hx-work" data-hwork aria-label="Selected work">
+      <div class="hx-work__viewport">
+        <div class="hx-work__track" data-hwork-track>
+          <div class="hx-work__intro">
+            <p class="hx-eyebrow"><BracketLabel text="Selected work" /></p>
+            <h2 class="hx-work__heading">Quiet work, loud results.</h2>
+            <span class="hx-work__hint">Scroll →</span>
+          </div>
+          {projects.map((p, i) => (
+            <a href={`/work/${p.id}`} class="hx-card" data-cursor-label="View" data-tilt>
+              <span class="hx-card__no">{pad(i)} <i>/ {total}</i></span>
+              <CrossImage src={p.data.cover} alt={p.data.client} variant={crossVariants[i % crossVariants.length]} class="hx-card__img" />
+              <div class="hx-card__foot">
+                <span class="hx-card__client">{p.data.client}</span>
+                <BracketLabel text={p.data.category} scramble={false} class="hx-card__cat" />
+              </div>
+            </a>
+          ))}
+          <a href="/work" class="hx-card hx-card--all"><span>View<br />all work</span><span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ TESTIMONIALS (editorial) ══ -->
+    <section class="container-x section border-t border-line">
+      <p class="hx-eyebrow mb-10"><BracketLabel text="Kind words" /></p>
+      <div class="hx-quotes">
+        <div data-reveal>
+          <blockquote class="hx-quote-lead" data-parallax="-6">
+            <p class="hx-quote-lead__text">{leadQuote.quote}</p>
+            <footer class="hx-quote__by">
+              <span class="hx-quote__name">{leadQuote.name}</span>
+              <span class="hx-quote__role">{leadQuote.role}, {leadQuote.company}</span>
+            </footer>
+          </blockquote>
+        </div>
+        <div class="hx-quote-grid">
+          {restQuotes.map((t) => (
+            <div data-reveal>
+              <blockquote class="hx-quote-card" data-parallax="-16">
+                <p class="hx-quote-card__text">{t.quote}</p>
+                <footer class="hx-quote__by">
+                  <span class="hx-quote__name">{t.name}</span>
+                  <span class="hx-quote__role">{t.role}, {t.company}</span>
+                </footer>
+              </blockquote>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ SITE QUALITY (proof) ══ -->
+    <section class="container-x section border-t border-line">
+      <div class="hx-stats-head">
+        <p class="hx-eyebrow"><BracketLabel text="Proof" /></p>
+        <h2 class="hx-h2" data-words>We audit ours too.</h2>
+        <p class="hx-lead">
+          Accessibility and speed are easy to promise and easy to check. These are this
+          page’s own Lighthouse scores — measured on the production build, not the dev
+          server.
+        </p>
+      </div>
+      <SiteQuality />
+    </section>
+
+    <!-- ══ JOURNAL / KNOWLEDGE ══ -->
+    <section class="container-x section border-t border-line">
+      <div class="hx-journal-head">
+        <div>
+          <p class="hx-eyebrow"><BracketLabel text="Journal" /></p>
+          <h2 class="hx-h2" data-words>Notes on design, art & visual communication.</h2>
+        </div>
+        <a href="/journal" class="hx-journal-all" data-cursor-label="Read">All articles →</a>
+      </div>
+      <div class="hx-journal">
+        {articles.map((a) => (
+          <a href={`/journal/${a.id}`} class="hx-art" data-reveal data-cursor-label="Read">
+            <div class="hx-art__top">
+              <BracketLabel text={a.data.category} scramble={false} />
+              <span class="hx-art__read">{a.data.readTime}</span>
+            </div>
+            <h3 class="hx-art__title">{a.data.title}</h3>
+            <p class="hx-art__excerpt">{a.data.excerpt}</p>
+            <span class="hx-art__meta">
+              {fmtDate(a.data.date)}
+              <span class="hx-art__arrow" aria-hidden="true">↗</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- Contact CTA is provided globally by the footer (ContactCta.astro) -->
+  </div>
+</BaseLayout>
+
+<style>
+  /* Palette lives in global tokens now (theme-aware); this just anchors bg. */
+  .hx {
+    background: rgb(var(--color-bg));
+    color: rgb(var(--color-ink));
+  }
+
+  .hx-eyebrow { font-size: 0.8rem; }
+  .hx-eyebrow--light :global(.brk) { color: rgb(var(--forest-ink)); }
+  .hx-tag { font-size: 0.72rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em; color: rgb(var(--color-muted)); }
+  .hx-tag b { color: rgb(var(--color-ink)); font-weight: 700; }
+  .hx-h2 { font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; font-size: clamp(1.9rem, 4vw, 3.25rem); line-height: 1; letter-spacing: -0.025em; margin-top: 0.9rem; }
+
+  /* ── Preloader ── */
+  #intro { position: fixed; inset: 0; z-index: 200; display: flex; flex-direction: column; justify-content: flex-end; gap: 1.5rem; padding: clamp(1.5rem, 5vw, 3rem); background: rgb(15 42 27); color: #f4f5ee; }
+  .intro__row { display: flex; align-items: flex-end; justify-content: space-between; overflow: hidden; }
+  .intro__name { font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; font-size: clamp(1.5rem, 5vw, 3rem); letter-spacing: -0.03em; }
+  .intro__count { font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; font-size: clamp(2.5rem, 10vw, 7rem); line-height: 0.9; letter-spacing: -0.04em; color: #8dc714; }
+  .intro__count i { font-size: 0.28em; color: rgb(244 245 238 / 0.5); font-style: normal; }
+  .intro__bar { height: 2px; background: rgb(244 245 238 / 0.15); }
+  .intro__bar span { display: block; height: 100%; width: 100%; transform: scaleX(0); transform-origin: 0 50%; background: #8dc714; }
+
+  /* ══ HERO (100vh, centered + spec bar) ══ */
+  .hx-hero { position: relative; height: 100vh; min-height: 100vh; max-height: 100vh; display: flex; flex-direction: column; overflow: hidden; padding: 5.5rem 0 1.75rem; }
+  .hx-hero__inner { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; justify-content: center; width: 100%; }
+  .hx-hero__kicker { margin-bottom: clamp(1rem, 2vw, 1.75rem); font-size: 0.85rem; }
+  .hx-hero__title { font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; font-size: clamp(2.5rem, 8.5vw, 8rem); line-height: 0.92; letter-spacing: -0.04em; }
+  .k-line { display: block; overflow: hidden; padding-bottom: 0.05em; }
+  .k-line__i { display: block; }
+  .hx-hero__title em { font-style: normal; background: rgb(var(--color-accent)); color: rgb(var(--forest)); padding: 0 0.12em; border-radius: 4px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  .hx-hero__lead { max-width: 34rem; margin-top: clamp(1.5rem, 3vw, 2.5rem); font-size: 1.1rem; color: rgb(var(--color-muted)); }
+
+  /* Bottom actions: scroll indicator (left) + CTA (right) */
+  .hx-hero__actions { position: relative; z-index: 1; display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem; margin-bottom: clamp(1.25rem, 2.5vw, 2rem); }
+  .hx-scroll { display: inline-flex; align-items: center; gap: 0.7rem; font-size: 0.68rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.18em; color: rgb(var(--color-muted)); }
+  .hx-scroll__line { position: relative; display: block; width: 3rem; height: 1px; overflow: hidden; background: rgb(var(--color-line)); }
+  .hx-scroll__line::after { content: ''; position: absolute; inset: 0; width: 45%; background: rgb(var(--color-accent)); animation: hx-scroll-slide 1.7s cubic-bezier(0.7, 0, 0.3, 1) infinite; }
+  @keyframes hx-scroll-slide { 0% { transform: translateX(-110%); } 100% { transform: translateX(260%); } }
+  @media (prefers-reduced-motion: reduce) { .hx-scroll__line::after { animation: none; } }
+  @media (max-width: 600px) { .hx-hero__actions { flex-direction: column-reverse; align-items: flex-start; gap: 1.75rem; } }
+
+  .hx-hero__bar { position: relative; z-index: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 2.25rem; padding-top: 1.25rem; border-top: 1px solid rgb(var(--color-line)); font-size: 0.78rem; }
+  .hx-spec { display: inline-flex; align-items: center; gap: 0.5rem; color: rgb(var(--color-muted)); }
+  .hx-spec b { font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; font-variant-numeric: tabular-nums; color: rgb(var(--color-ink)); }
+  .hx-spec--status { margin-left: auto; }
+  .hx-dot { width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: rgb(var(--color-accent)); box-shadow: 0 0 0 0 rgb(var(--color-accent) / 0.6); animation: hx-pulse 2s ease-out infinite; }
+  @keyframes hx-pulse { 0% { box-shadow: 0 0 0 0 rgb(var(--color-accent) / 0.55); } 70% { box-shadow: 0 0 0 8px rgb(var(--color-accent) / 0); } 100% { box-shadow: 0 0 0 0 rgb(var(--color-accent) / 0); } }
+  @media (prefers-reduced-motion: reduce) { .hx-dot { animation: none; } }
+
+  .hx-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.85rem 1.6rem; background: rgb(var(--color-ink)); color: rgb(var(--color-bg)); font-size: 0.9rem; font-weight: 600; border-radius: 6px; transition: background-color 0.3s ease; will-change: transform; }
+  .hx-btn:hover { background: rgb(var(--color-accent)); color: rgb(var(--forest)); }
+  .hx-btn--light { background: rgb(var(--color-accent)); color: rgb(var(--forest)); }
+
+  /* ══ MARQUEE (refined) ══ */
+  .hx-marq { overflow: hidden; border-block: 1px solid rgb(var(--color-line)); padding-block: 1.1rem; }
+  .hx-marq__track { display: flex; width: max-content; will-change: transform; }
+  .hx-marq__item { display: inline-flex; align-items: center; gap: 1.75rem; padding-inline: 1.1rem; font-family: 'Space Grotesk Variable', sans-serif; font-weight: 600; font-size: clamp(1.25rem, 2.6vw, 2.25rem); letter-spacing: -0.02em; white-space: nowrap; color: rgb(var(--color-ink)); }
+  .hx-marq__item i { font-style: normal; color: rgb(var(--color-accent-text)); font-size: 0.6em; }
+
+  /* Marquee pause control (WCAG 2.2.2) */
+  .hx-marq { position: relative; }
+  .hx-marq__pause {
+    position: absolute;
+    top: 50%;
+    right: clamp(0.75rem, 2vw, 1.5rem);
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid rgb(var(--color-line));
+    background: rgb(var(--color-bg) / 0.85);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    color: rgb(var(--color-ink));
+    transition: border-color 0.3s ease, color 0.3s ease;
+  }
+  .hx-marq__pause:hover { border-color: rgb(var(--color-ink)); color: rgb(var(--color-accent-text)); }
+  /* Pause glyph (two bars) → Play glyph (triangle) when already paused. */
+  .hx-marq__pause-icon {
+    width: 10px;
+    height: 11px;
+    border-left: 3px solid currentColor;
+    border-right: 3px solid currentColor;
+  }
+  .hx-marq__pause[aria-pressed='true'] .hx-marq__pause-icon {
+    width: 0;
+    height: 0;
+    border-left: 9px solid currentColor;
+    border-right: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    margin-left: 2px;
+  }
+
+  /* ══ MANIFESTO ══ */
+  .hx-manifesto { min-height: 90svh; display: flex; align-items: center; }
+  .hx-manifesto__text { margin-top: 1.75rem; max-width: 60rem; font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; font-size: clamp(1.6rem, 4.2vw, 3.4rem); line-height: 1.12; letter-spacing: -0.02em; }
+
+  /* Scrubbed word reveal. `--lit` (0 → 1) is driven by GSAP; the colour is
+     derived from the theme tokens via color-mix, so the words stay correct
+     across a light/dark toggle mid-scroll — an inline rgb() from GSAP would go
+     stale the moment the theme changed.
+
+     It ramps muted → ink rather than fading opacity in from near-zero: an
+     un-revealed word is still real text a reader may reach before the animation
+     does, so it has to clear 4.5:1 on its own (muted is 4.88:1). */
+  .hx-manifesto__text [data-mword] {
+    color: color-mix(
+      in srgb,
+      rgb(var(--color-ink)) calc(var(--lit, 1) * 100%),
+      rgb(var(--color-muted))
+    );
+  }
+
+  /* ══ FOREST ══ */
+
+  /* ══ SERVICES ══ */
+  .hx-srv-list { border-top: 1px solid rgb(var(--color-ink)); }
+  .hx-srv { display: grid; grid-template-columns: auto 1fr; gap: 0.4rem 1.5rem; align-items: center; padding: clamp(1.5rem, 3vw, 2.4rem) 0; border-bottom: 1px solid rgb(var(--color-line)); }
+  @media (min-width: 900px) { .hx-srv { grid-template-columns: 3.5rem minmax(0, 16rem) 1fr auto auto; } }
+  .hx-srv__no { font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; color: rgb(var(--color-accent-text)); }
+  .hx-srv__title { font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; font-size: clamp(1.5rem, 3vw, 2.4rem); line-height: 1; letter-spacing: -0.02em; transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+  .hx-srv__desc { display: none; color: rgb(var(--color-muted)); max-width: 26rem; }
+  @media (min-width: 900px) { .hx-srv__desc { display: block; } }
+  .hx-srv__tags { display: none; gap: 0.6rem; }
+  @media (min-width: 1100px) { .hx-srv__tags { display: inline-flex; } }
+  .hx-srv__arrow { color: rgb(var(--color-accent-text)); font-size: 1.3rem; opacity: 0; transform: translateX(-0.5rem); transition: opacity 0.3s, transform 0.3s; }
+  .hx-srv:hover .hx-srv__title { transform: translateX(0.6rem); }
+  .hx-srv:hover .hx-srv__arrow { opacity: 1; transform: translateX(0); }
+
+  /* ══ PROCESS ══ */
+  .hx-proc-head, .hx-stats-head { margin-bottom: 3rem; }
+  .hx-lead { margin-top: 1.5rem; max-width: 42rem; font-size: 1.05rem; line-height: 1.6; color: rgb(var(--color-muted)); }
+  .hx-proc { display: grid; gap: 2rem; }
+  @media (min-width: 700px) { .hx-proc { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1100px) { .hx-proc { grid-template-columns: repeat(4, 1fr); } }
+  .hx-proc__step { border-top: 1px solid rgb(var(--color-line)); padding-top: 1.25rem; }
+  .hx-proc__no { font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; font-size: 0.85rem; color: rgb(var(--color-accent-text)); }
+  .hx-proc__title { font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; font-size: clamp(1.35rem, 2.5vw, 1.9rem); letter-spacing: -0.02em; margin-top: 0.5rem; }
+  .hx-proc__body { margin-top: 0.75rem; color: rgb(var(--color-muted)); }
+
+  /* ══ WORK ══ */
+  .hx-work__viewport { overflow-x: auto; scrollbar-width: none; }
+  .hx-work__viewport::-webkit-scrollbar { display: none; }
+  .hx-work.is-pinned .hx-work__viewport { overflow: hidden; }
+  .hx-work__track { display: flex; gap: clamp(1.25rem, 2.5vw, 2.5rem); align-items: stretch; width: max-content; padding: clamp(3rem, 8vh, 6rem) clamp(1.5rem, 5vw, 4rem); }
+  .hx-work__intro { display: flex; flex-direction: column; justify-content: flex-end; gap: 1rem; width: clamp(16rem, 26vw, 24rem); padding-right: 1.5rem; }
+  .hx-work__heading { font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; font-size: clamp(1.8rem, 3.5vw, 3rem); line-height: 1; letter-spacing: -0.03em; }
+  .hx-work__hint { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.18em; color: rgb(var(--color-accent-text)); }
+  .hx-card { display: flex; flex-direction: column; gap: 0.9rem; width: clamp(17rem, 30vw, 25rem); }
+  .hx-card__no { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; color: rgb(var(--color-muted)); font-variant-numeric: tabular-nums; }
+  /* The "/ 04" suffix. It used to take `--color-line` (a hairline token) as its
+     colour, which is 1.25:1 as text. Muted at FULL strength is the only option
+     here: even 0.9 alpha drops it to 3.97:1, under the 4.5:1 floor for 12px.
+     The lighter weight is what separates it from the index now, not the colour. */
+  .hx-card__no i { font-style: normal; font-weight: 400; color: rgb(var(--color-muted)); }
+  .hx-card__foot { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+  .hx-card__client { font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; font-size: clamp(1.3rem, 2vw, 1.85rem); letter-spacing: -0.02em; transition: color 0.3s; }
+  .hx-card:hover .hx-card__client { color: rgb(var(--color-accent-text)); }
+  .hx-card__cat { font-size: 0.7rem !important; }
+  /* Dark panel: restore the BRIGHT lime (the deepened token is for light bgs). */
+  .hx-card--all { --color-accent-text: var(--color-accent); justify-content: center; align-items: flex-start; gap: 1.5rem; width: clamp(13rem, 20vw, 18rem); padding: 2rem; background: rgb(var(--forest)); color: rgb(var(--forest-ink)); border-radius: 12px; }
+  .hx-card--all span:first-child { font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; font-size: clamp(1.5rem, 3vw, 2.2rem); line-height: 1; letter-spacing: -0.02em; }
+  .hx-card--all span:last-child { font-size: 1.75rem; color: rgb(var(--color-accent-text)); }
+
+  /* ══ TESTIMONIALS (editorial) ══ */
+  .hx-quotes { display: grid; gap: 3rem 4rem; }
+  @media (min-width: 900px) { .hx-quotes { grid-template-columns: 1.15fr 1fr; align-items: start; } }
+  .hx-quote-lead::before { content: '“'; display: block; font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; font-size: 5rem; line-height: 0.55; color: rgb(var(--color-accent-text)); margin-bottom: 1rem; }
+  .hx-quote-lead__text { font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; font-size: clamp(1.55rem, 3.2vw, 2.6rem); line-height: 1.14; letter-spacing: -0.02em; }
+  .hx-quote__by { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.15rem; }
+  .hx-quote__name { font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; }
+  .hx-quote__role { font-size: 0.9rem; color: rgb(var(--color-muted)); }
+  .hx-quote-grid { display: grid; gap: 1.5rem; }
+  .hx-quote-card { border: 1px solid rgb(var(--color-line)); background: rgb(var(--color-surface)); padding: clamp(1.5rem, 2.5vw, 2rem); }
+  .hx-quote-card__text { font-size: 1.05rem; line-height: 1.55; }
+  .hx-quote-card__text::before { content: '“'; color: rgb(var(--color-accent-text)); font-weight: 700; }
+  .hx-quote-card__text::after { content: '”'; color: rgb(var(--color-accent-text)); font-weight: 700; }
+  .hx-quote-card .hx-quote__by { margin-top: 1.25rem; }
+
+  /* ══ JOURNAL ══ */
+  .hx-journal-head { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 3rem; }
+  @media (min-width: 700px) { .hx-journal-head { flex-direction: row; align-items: flex-end; justify-content: space-between; } }
+  .hx-journal-all { font-size: 0.9rem; font-weight: 600; color: rgb(var(--color-muted)); white-space: nowrap; transition: color 0.3s ease; }
+  .hx-journal-all:hover { color: rgb(var(--color-accent-text)); }
+  .hx-journal { display: grid; gap: 1px; border: 1px solid rgb(var(--color-line)); background: rgb(var(--color-line)); }
+  @media (min-width: 800px) { .hx-journal { grid-template-columns: repeat(3, 1fr); } }
+  .hx-art { display: flex; flex-direction: column; gap: 1rem; background: rgb(var(--color-bg)); padding: clamp(1.5rem, 2.5vw, 2rem); transition: background-color 0.35s ease; }
+  .hx-art:hover { background: rgb(var(--color-surface)); }
+  .hx-art__top { display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; }
+  .hx-art__read { text-transform: uppercase; letter-spacing: 0.12em; color: rgb(var(--color-muted)); }
+  .hx-art__title { font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; font-size: clamp(1.35rem, 2vw, 1.7rem); line-height: 1.08; letter-spacing: -0.02em; transition: color 0.3s ease; }
+  .hx-art:hover .hx-art__title { color: rgb(var(--color-accent-text)); }
+  .hx-art__excerpt { flex: 1; color: rgb(var(--color-muted)); font-size: 0.95rem; line-height: 1.5; }
+  .hx-art__meta { display: flex; align-items: center; justify-content: space-between; margin-top: 0.25rem; padding-top: 1rem; border-top: 1px solid rgb(var(--color-line)); font-size: 0.8rem; color: rgb(var(--color-muted)); font-variant-numeric: tabular-nums; }
+  .hx-art__arrow { color: rgb(var(--color-accent-text)); opacity: 0; transform: translate(-4px, 4px); transition: opacity 0.3s ease, transform 0.3s ease; }
+  .hx-art:hover .hx-art__arrow { opacity: 1; transform: translate(0, 0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hx-manifesto { min-height: auto; }
+  }
+</style>
+
+<script>
+  // GSAP/ScrollTrigger are dynamically imported after first paint — none of the
+  // homepage motion is needed to render the page. See src/scripts/motion.ts.
+  import { loadMotion, whenIdleOrIntent, onReady, type Motion } from '../scripts/motion';
+
+  let gsap: Motion['gsap'];
+  let ScrollTrigger: Motion['ScrollTrigger'];
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const q = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => r.querySelector<T>(s);
+  const qa = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => Array.from(r.querySelectorAll<T>(s));
+
+  // function heroReveal() {
+  //   const lines = qa('[data-hero-line-inner]');
+  //   const fades = qa('[data-hero-fade]');
+  //   if (reduce) { gsap.set([...lines, ...fades], { clearProps: 'all' }); return; }
+  //   gsap.from(lines, { yPercent: 115, duration: 1, ease: 'power4.out', stagger: 0.09 });
+  //   gsap.from(fades, { opacity: 0, y: 24, duration: 0.85, ease: 'power2.out', stagger: 0.09, delay: 0.35 });
+  // }
+
+  function clock() {
+    const el = q('[data-clock]');
+    if (!el) return;
+    const upd = () => {
+      el.textContent = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    };
+    upd();
+    const id = window.setInterval(upd, 1000);
+    document.addEventListener('astro:before-swap', () => window.clearInterval(id), { once: true });
+  }
+
+  function scramble() {
+    if (reduce) return;
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#%*+=/';
+    qa('[data-scramble]').forEach((el) => {
+      const final = el.textContent || '';
+      const io = new IntersectionObserver((ents) => ents.forEach((en) => {
+        if (!en.isIntersecting) return; io.disconnect();
+        let frame = 0; const totalFrames = 16;
+        const tick = () => { frame++; el.textContent = final.split('').map((ch, i) => (ch === ' ' || frame > totalFrames - (final.length - i) * 1.4 ? ch : chars[Math.floor(Math.random() * chars.length)])).join(''); if (frame < totalFrames) requestAnimationFrame(tick); else el.textContent = final; };
+        tick();
+      }), { threshold: 0.6 });
+      io.observe(el);
+    });
+  }
+
+  function blocks() {
+    if (reduce) return;
+    qa('[data-blocks]').forEach((grid) => {
+      gsap.from(qa('[data-block]', grid), { scale: 0.2, opacity: 0, transformOrigin: '50% 50%', duration: 0.6, ease: 'back.out(1.7)', stagger: { each: 0.05, from: 'random' }, scrollTrigger: { trigger: grid, start: 'top 85%', once: true } });
+    });
+  }
+
+  function sunburst() {
+    if (reduce) return;
+    qa('[data-sunburst] line').forEach((ln) => { const len = (ln as SVGLineElement).getTotalLength?.() || 92; gsap.set(ln, { strokeDasharray: len, strokeDashoffset: len }); });
+    qa('[data-sunburst]').forEach((sb) => { gsap.to(qa('line', sb), { strokeDashoffset: 0, duration: 0.8, ease: 'power2.out', stagger: 0.014, scrollTrigger: { trigger: sb, start: 'top 95%', once: true } }); });
+  }
+
+  function crossReveal() {
+    if (reduce) return;
+    qa('[data-cross]').forEach((el) => { gsap.from(el, { scale: 0.94, opacity: 0, duration: 0.9, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 90%', once: true } }); });
+  }
+
+  function velocityMarquee() {
+    const track = q('[data-marq-track]');
+    const pauseBtn = q<HTMLButtonElement>('[data-marq-pause]');
+    const pauseLabel = q('[data-marq-pause-label]');
+    if (!track) return;
+
+    // Reduced motion: never animate, and the control is redundant — hide it.
+    if (reduce) {
+      pauseBtn?.remove();
+      return;
+    }
+
+    const roll = gsap.to(track, { xPercent: -50, repeat: -1, duration: 26, ease: 'none' });
+    ScrollTrigger.create({ trigger: '[data-marq]', start: 'top bottom', end: 'bottom top', onUpdate: (self) => { gsap.to(track, { skewX: gsap.utils.clamp(-10, 10, self.getVelocity() / -150), duration: 0.4, ease: 'power2.out', overwrite: 'auto' }); } });
+
+    // WCAG 2.2.2 — a real, keyboard-operable pause control.
+    pauseBtn?.addEventListener('click', () => {
+      const paused = roll.paused();
+      roll.paused(!paused);
+      const nowPaused = !paused;
+      pauseBtn.setAttribute('aria-pressed', String(nowPaused));
+      if (pauseLabel) {
+        pauseLabel.textContent = nowPaused ? 'Resume scrolling text' : 'Pause scrolling text';
+      }
+    });
+  }
+
+  function manifesto() {
+    const sec = q('[data-manifesto]'); if (!sec) return;
+    const words = qa('[data-mword]', sec);
+    if (reduce) { gsap.set(words, { '--lit': 1 }); return; }
+    gsap.set(words, { '--lit': 0 });
+    gsap.to(words, { '--lit': 1, ease: 'none', stagger: 0.4, scrollTrigger: { trigger: sec, start: 'top top', end: '+=130%', scrub: true, pin: true, anticipatePin: 1 } });
+  }
+
+  function horizontalWork() {
+    const sec = q('[data-hwork]'); const track = q('[data-hwork-track]');
+    if (!sec || !track || reduce || window.innerWidth < 768) return;
+    sec.classList.add('is-pinned');
+    const amount = () => track.scrollWidth - window.innerWidth;
+    const tween = gsap.to(track, { x: () => -amount(), ease: 'none', scrollTrigger: { trigger: sec, start: 'top top', end: () => '+=' + amount(), pin: true, scrub: 1, invalidateOnRefresh: true } });
+
+    // A11y: the cards are moved horizontally by scroll, so tabbing to one that
+    // is still off-screen would focus something invisible. Map the focused
+    // card's horizontal offset back to a page-scroll position and go there.
+    const st = tween.scrollTrigger;
+    track.addEventListener('focusin', (e) => {
+      const card = (e.target as HTMLElement).closest<HTMLElement>('.hx-card');
+      if (!card || !st) return;
+      const max = amount();
+      if (max <= 0) return;
+      // How far along the track this card sits (0–1), centred in the viewport.
+      const target = card.offsetLeft - (window.innerWidth - card.offsetWidth) / 2;
+      const progress = Math.min(Math.max(target / max, 0), 1);
+      const y = st.start + progress * (st.end - st.start);
+      const lenis = (window as any).lenis;
+      if (lenis) lenis.scrollTo(y, { immediate: true });
+      else window.scrollTo({ top: y });
+    });
+  }
+
+  // The preloader lives in BaseLayout now. Chain the hero reveal onto it —
+  // works whether the intro plays, is skipped, or has already finished.
+  function afterIntro(onDone: () => void) {
+    if ((window as any).__introDone) { onDone(); return; }
+    let ran = false;
+    const go = () => { if (ran) return; ran = true; onDone(); };
+    document.addEventListener('qs:intro-done', go, { once: true });
+    window.setTimeout(go, 6500); // fallback: never leave the hero unrevealed
+  }
+
+  // Hero parallax — content drifts up + fades as you scroll through the hero.
+  // Uses the hero as trigger (start 'top top') so it sits at rest on load.
+  function heroParallax() {
+    if (reduce) return;
+    const hero = q('[data-hero]');
+    const inner = q('.hx-hero__inner');
+    if (!hero || !inner) return;
+    gsap.to(inner, {
+      yPercent: -18,
+      opacity: 0.35,
+      ease: 'none',
+      scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
+    });
+  }
+
+  // Kinetic word-by-word heading reveal
+  function splitWords() {
+    if (reduce) return;
+    qa('[data-words]').forEach((el) => {
+      const words = (el.textContent || '').trim().split(/\s+/);
+      el.textContent = '';
+      const inners: HTMLElement[] = [];
+      words.forEach((w, i) => {
+        const mask = document.createElement('span');
+        mask.className = 'word-mask';
+        const inner = document.createElement('span');
+        inner.className = 'word-inner';
+        inner.textContent = w;
+        mask.appendChild(inner);
+        el.appendChild(mask);
+        if (i < words.length - 1) el.appendChild(document.createTextNode(' '));
+        inners.push(inner);
+      });
+      gsap.set(el, { opacity: 1 });
+      gsap.from(inners, {
+        yPercent: 115,
+        duration: 0.9,
+        ease: 'power4.out',
+        stagger: 0.05,
+        scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+      });
+    });
+  }
+
+  // 3D hover-tilt on cards
+  function tilt() {
+    if (reduce || !window.matchMedia('(pointer: fine)').matches) return;
+    qa('[data-tilt]').forEach((el) => {
+      const move = (e: MouseEvent) => {
+        const r = el.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        gsap.to(el, {
+          rotateY: px * 9,
+          rotateX: -py * 9,
+          transformPerspective: 900,
+          transformOrigin: 'center',
+          duration: 0.4,
+          ease: 'power2.out',
+        });
+      };
+      const leave = () => gsap.to(el, { rotateX: 0, rotateY: 0, duration: 0.6, ease: 'power3.out' });
+      el.addEventListener('mousemove', move as EventListener);
+      el.addEventListener('mouseleave', leave);
+    });
+  }
+
+  function setup() {
+    const home = q('[data-home]'); if (!home || home.dataset.ready) return;
+    home.dataset.ready = '1';
+
+    // Needs no motion library — start ticking immediately rather than waiting.
+    try { clock(); } catch (e) { console.error('[home] clock failed', e); }
+
+    // Everything below depends on GSAP, and none of it is needed to paint.
+    whenIdleOrIntent(async () => {
+      const m = await loadMotion();
+      gsap = m.gsap;
+      ScrollTrigger = m.ScrollTrigger;
+      try { heroParallax(); velocityMarquee(); manifesto(); horizontalWork(); scramble(); blocks(); sunburst(); crossReveal(); splitWords(); tilt(); ScrollTrigger.refresh(); }
+      catch (e) { console.error('[home] setup failed', e); }
+    });
+
+    // afterIntro(heroReveal);
+  }
+
+  onReady(() => { try { setup(); } catch (e) { const i = document.getElementById('intro'); if (i) i.style.display = 'none'; console.error(e); } });
+</script>

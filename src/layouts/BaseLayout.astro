@@ -1,0 +1,518 @@
+---
+// Fonts: the default @fontsource-variable entrypoints ship EVERY subset
+// (latin, latin-ext, vietnamese, cyrillic…) — 10 woff2 / ~276 KB. This site is
+// English-only, so we declare the two latin faces ourselves and ship just those
+// two files. `?url` gives us the hashed, build-time URL so we can also preload
+// them (an unpreloaded webfont is a FOUT + layout-shift risk).
+import spaceGroteskLatin from '@fontsource-variable/space-grotesk/files/space-grotesk-latin-wght-normal.woff2?url';
+import interLatin from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Preloader from '../components/Preloader.astro';
+import Footer from '../components/Footer.astro';
+import { site, socials } from '../data/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  /** Set on journal posts so the page emits Article structured data. */
+  article?: {
+    published: Date;
+    author?: string;
+    section?: string;
+  };
+}
+
+const {
+  title,
+  description = site.description,
+  image = '/og-default.svg',
+  article,
+} = Astro.props;
+
+const pageTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site.seoTagline}`;
+const origin = (Astro.site ?? new URL(Astro.url.origin)).origin;
+const canonical = new URL(Astro.url.pathname, origin).href;
+const ogImage = new URL(image, origin).href;
+
+// ── Structured data (JSON-LD) ──────────────────────────────────────────────
+// Organization + WebSite on every page; Article additionally on journal posts.
+const orgId = `${origin}/#organization`;
+const schema: Record<string, unknown>[] = [
+  {
+    '@type': 'Organization',
+    '@id': orgId,
+    name: site.name,
+    url: origin,
+    description: site.description,
+    email: site.email,
+    telephone: site.phone,
+    logo: new URL('/favicon.svg', origin).href,
+    sameAs: socials.map((s) => s.href),
+  },
+  {
+    '@type': 'WebSite',
+    '@id': `${origin}/#website`,
+    url: origin,
+    name: site.name,
+    description: site.description,
+    publisher: { '@id': orgId },
+    inLanguage: 'en',
+  },
+];
+
+if (article) {
+  schema.push({
+    '@type': 'Article',
+    headline: title,
+    description,
+    image: ogImage,
+    datePublished: article.published.toISOString(),
+    author: { '@type': 'Organization', name: article.author ?? site.name },
+    publisher: { '@id': orgId },
+    articleSection: article.section,
+    mainEntityOfPage: canonical,
+    inLanguage: 'en',
+  });
+}
+
+const jsonLd = { '@context': 'https://schema.org', '@graph': schema };
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Preload the two latin faces: they're needed for the very first paint,
+         and discovering them via CSS costs a round trip (FOUT + layout shift). -->
+    <link rel="preload" href={spaceGroteskLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
+
+    <!-- No-JS: the preloader can never be dismissed, so never show it.
+         Must live in <head> — <style> is not valid inside <body>. -->
+    <noscript><style>#intro{display:none!important}</style></noscript>
+
+    <style is:inline set:html={`
+      @font-face {
+        font-family: 'Space Grotesk Variable';
+        font-style: normal;
+        font-display: swap;
+        font-weight: 300 700;
+        src: url(${spaceGroteskLatin}) format('woff2-variations');
+        unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+      }
+      @font-face {
+        font-family: 'Inter Variable';
+        font-style: normal;
+        font-display: swap;
+        font-weight: 100 900;
+        src: url(${interLatin}) format('woff2-variations');
+        unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+      }
+      /* Metric-matched fallbacks. Without these, the swap from the system font
+         to the webfont reflows text and costs CLS. */
+      @font-face {
+        font-family: 'Inter Fallback';
+        src: local('Arial');
+        size-adjust: 107%;
+        ascent-override: 90%;
+        descent-override: 22.4%;
+        line-gap-override: 0%;
+      }
+      @font-face {
+        font-family: 'Grotesk Fallback';
+        src: local('Arial');
+        size-adjust: 103%;
+        ascent-override: 98%;
+        descent-override: 25%;
+        line-gap-override: 0%;
+      }
+    `} />
+
+    <!-- Set theme before paint (no flash), and re-apply after every view
+         transition swap (ClientRouter resets <html> attributes otherwise). -->
+    <script is:inline>
+      (function () {
+        function applyTheme() {
+          try {
+            var t = localStorage.getItem('theme');
+            if (t !== 'light' && t !== 'dark') {
+              t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.dataset.theme = t;
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', t === 'dark' ? '#0c110d' : '#f4f5ee');
+          } catch (e) {}
+        }
+        // If the preloader already played this session, hide it before paint.
+        function applyIntroSeen() {
+          try {
+            if (sessionStorage.getItem('qs-intro')) {
+              document.documentElement.classList.add('intro-seen');
+            }
+          } catch (e) {}
+        }
+        // Marks JS as available. `html.js [data-reveal]` is gated on this, so a
+        // no-JS visitor (or a JS failure) still sees all content.
+        document.documentElement.classList.add('js');
+        applyTheme();
+        applyIntroSeen();
+        document.addEventListener('astro:after-swap', function () {
+          applyTheme();
+          applyIntroSeen();
+        });
+      })();
+    </script>
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <!-- Open Graph / social -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL(image, Astro.site ?? Astro.url.origin).href} />
+    <meta property="og:site_name" content={site.name} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+
+    <meta name="theme-color" content="#f4f5ee" />
+
+    <!-- Structured data: Organization + WebSite sitewide, Article on posts. -->
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
+
+    {/* Astro's ClientRouter (View Transitions) used to sit here. It cost ~200 ms
+        of total blocking time on desktop and ~600 ms on mobile — measured, and
+        on its own enough to hold Lighthouse Performance at 93/75. Navigations
+        are plain page loads now; the preloader curtain covers them. Init is
+        driven by onReady() in scripts/motion.ts rather than astro:page-load. */}
+  </head>
+  <body>
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-sm focus:text-bg"
+      >Skip to content</a
+    >
+
+    <Preloader />
+
+    <div class="scroll-progress" data-scroll-progress aria-hidden="true"></div>
+
+    <!-- Custom cursor (hidden on touch / reduced motion) -->
+    <div class="cursor-dot" aria-hidden="true"></div>
+    <div class="cursor-ring" aria-hidden="true"><span class="cursor-ring__label"></span></div>
+
+    <Nav />
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <Footer />
+
+    <!-- ── Animation runtime: Lenis smooth scroll + GSAP reveals ────
+         GSAP/ScrollTrigger/Lenis (~130 KB) are NOT on the critical path — they
+         are dynamically imported after first paint (see src/scripts/motion.ts).
+         Nothing here is needed to render the page. -->
+    <script>
+      import {
+        loadMotion,
+        whenIdleOrIntent,
+        wordRevealColors,
+        onReady,
+        isLightweight,
+        type Motion,
+      } from '../scripts/motion';
+
+      // Assigned once the motion chunk resolves. Every setup fn below reads these.
+      let gsap: Motion['gsap'];
+      let ScrollTrigger: Motion['ScrollTrigger'];
+      let Lenis: Motion['Lenis'];
+
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      let lenis: InstanceType<Motion['Lenis']> | undefined;
+
+      function startLenis() {
+        // Smooth-scroll is a desktop nicety and a mobile tax: it runs a rAF loop
+        // for the life of the page and fights the platform's own (already
+        // excellent) touch scrolling. Phones scroll natively.
+        if (reduceMotion || isLightweight()) return;
+        lenis = new Lenis({ duration: 1.1, smoothWheel: true });
+        // Expose so the nav overlay can lock/unlock scroll while open.
+        (window as any).lenis = lenis;
+        lenis.on('scroll', ScrollTrigger.update);
+        gsap.ticker.add((time) => lenis?.raf(time * 1000));
+        gsap.ticker.lagSmoothing(0);
+      }
+
+      function setupReveals() {
+        if (reduceMotion) return;
+
+        // Generic scroll-reveal for [data-reveal]
+        gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach((el) => {
+          const delay = parseFloat(el.dataset.revealDelay ?? '0');
+          gsap.to(el, {
+            opacity: 1,
+            y: 0,
+            duration: 0.9,
+            delay,
+            ease: 'power3.out',
+            scrollTrigger: { trigger: el, start: 'top 85%', once: true },
+          });
+        });
+
+        // Hero line reveal on load ([data-hero-line])
+        const heroLines = gsap.utils.toArray<HTMLElement>('[data-hero-line] > span');
+        if (heroLines.length) {
+          gsap.set(heroLines, { yPercent: 110 });
+          gsap.to(heroLines, {
+            yPercent: 0,
+            duration: 1,
+            ease: 'power4.out',
+            stagger: 0.09,
+            delay: 0.15,
+          });
+        }
+
+        // Statement word-reveal ([data-statement]) — splits plain text into words
+        // and fades them in with a stagger on entry. Deliberately NOT pinned or
+        // scrubbed, so it never lengthens the page or collides with other pins.
+        gsap.utils.toArray<HTMLElement>('[data-statement]').forEach((el) => {
+          if (el.dataset.statementReady) return;
+          el.dataset.statementReady = '1';
+
+          const words = (el.textContent || '').trim().split(/\s+/);
+          if (!words.length) return;
+          el.textContent = '';
+          const spans: HTMLElement[] = [];
+          words.forEach((w, i) => {
+            const s = document.createElement('span');
+            s.className = 'statement-word';
+            s.textContent = w;
+            el.appendChild(s);
+            if (i < words.length - 1) el.appendChild(document.createTextNode(' '));
+            spans.push(s);
+          });
+
+          const { dim, lit } = wordRevealColors();
+          gsap.set(spans, { color: dim });
+          gsap.to(spans, {
+            color: lit,
+            duration: 0.5,
+            ease: 'power1.out',
+            stagger: 0.04,
+            scrollTrigger: { trigger: el, start: 'top 82%', once: true },
+            // Hand the words back to the CSS tokens so a theme toggle after the
+            // reveal still repaints them.
+            onComplete: () => {
+              spans.forEach((s) => s.classList.add('is-lit'));
+              gsap.set(spans, { clearProps: 'color,willChange' });
+            },
+          });
+        });
+
+        // Parallax on [data-parallax] — optional speed, e.g. data-parallax="-18"
+        gsap.utils.toArray<HTMLElement>('[data-parallax]').forEach((el) => {
+          const amount = parseFloat(el.dataset.parallax || '') || -12;
+          gsap.to(el, {
+            yPercent: amount,
+            ease: 'none',
+            scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true },
+          });
+        });
+
+        // Count-up stats on [data-count]. The real figure is rendered
+        // server-side; we only zero it here, once GSAP is confirmed loaded, so
+        // that a no-JS visitor reads "120+" rather than "0+".
+        gsap.utils.toArray<HTMLElement>('[data-count]').forEach((el) => {
+          const target = parseFloat(el.dataset.count ?? '0');
+          const suffix = el.dataset.countSuffix ?? '';
+          const decimals = Number.isInteger(target) ? 0 : 1;
+          el.textContent = (0).toFixed(decimals) + suffix;
+          const obj = { val: 0 };
+          gsap.to(obj, {
+            val: target,
+            duration: 1.6,
+            ease: 'power2.out',
+            scrollTrigger: { trigger: el, start: 'top 90%', once: true },
+            onUpdate: () => {
+              el.textContent = obj.val.toFixed(decimals) + suffix;
+            },
+          });
+        });
+
+        // Scroll progress bar
+        const bar = document.querySelector<HTMLElement>('[data-scroll-progress]');
+        if (bar) {
+          gsap.to(bar, {
+            scaleX: 1,
+            ease: 'none',
+            scrollTrigger: { start: 0, end: 'max', scrub: 0.3 },
+          });
+        }
+      }
+
+      // ── Custom cursor (fine pointers + motion only) ──────────────
+      let cursorCleanup: (() => void) | null = null;
+      function setupCursor() {
+        if (reduceMotion || !window.matchMedia('(pointer: fine)').matches) return;
+        const dot = document.querySelector<HTMLElement>('.cursor-dot');
+        const ring = document.querySelector<HTMLElement>('.cursor-ring');
+        const label = ring?.querySelector<HTMLElement>('.cursor-ring__label');
+        if (!dot || !ring) return;
+
+        const root = document.documentElement;
+        // NOTE: we no longer add 'cursor-none' — the native cursor stays visible.
+
+        let mx = window.innerWidth / 2,
+          my = window.innerHeight / 2;
+        let rx = mx,
+          ry = my,
+          scale = 1,
+          target = 1,
+          active = false,
+          raf = 0;
+
+        const onMove = (e: MouseEvent) => {
+          mx = e.clientX;
+          my = e.clientY;
+          if (!active) {
+            active = true;
+            root.classList.add('is-cursor-active');
+          }
+        };
+        const sel = 'a, button, input, textarea, select, [data-cursor], .menu-link';
+        const onOver = (e: MouseEvent) => {
+          const target_el = e.target as HTMLElement;
+          if (!target_el.closest(sel)) return;
+          const lbl = target_el.closest('[data-cursor-label]')?.getAttribute('data-cursor-label');
+          ring.classList.add('is-hover');
+          dot.classList.add('is-hover');
+          if (lbl && label) {
+            label.textContent = lbl;
+            ring.classList.add('is-label');
+            target = 2.7;
+          } else {
+            ring.classList.remove('is-label');
+            target = 2.1;
+          }
+        };
+        const onOut = (e: MouseEvent) => {
+          if (!(e.target as HTMLElement).closest(sel)) return;
+          ring.classList.remove('is-hover', 'is-label');
+          dot.classList.remove('is-hover');
+          target = 1;
+        };
+        window.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseover', onOver);
+        document.addEventListener('mouseout', onOut);
+
+        const render = () => {
+          rx += (mx - rx) * 0.2;
+          ry += (my - ry) * 0.2;
+          scale += (target - scale) * 0.15;
+          dot.style.transform = `translate(${mx}px, ${my}px)`;
+          ring.style.transform = `translate(${rx}px, ${ry}px) scale(${scale})`;
+          raf = requestAnimationFrame(render);
+        };
+        render();
+
+        cursorCleanup = () => {
+          cancelAnimationFrame(raf);
+          window.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseover', onOver);
+          document.removeEventListener('mouseout', onOut);
+          root.classList.remove('is-cursor-active');
+        };
+      }
+
+      // ── Magnetic elements ────────────────────────────────────────
+      type Magnet = { el: Element; move: EventListener; leave: EventListener };
+      let magnets: Magnet[] = [];
+      function setupMagnetic() {
+        if (reduceMotion || !window.matchMedia('(pointer: fine)').matches) return;
+        document.querySelectorAll<HTMLElement>('[data-magnetic], .btn').forEach((el) => {
+          const strength = parseFloat(el.dataset.magnetic ?? '') || 0.3;
+          const move = ((e: MouseEvent) => {
+            const r = el.getBoundingClientRect();
+            gsap.to(el, {
+              x: (e.clientX - (r.left + r.width / 2)) * strength,
+              y: (e.clientY - (r.top + r.height / 2)) * strength,
+              duration: 0.4,
+              ease: 'power3.out',
+            });
+          }) as EventListener;
+          const leave = (() =>
+            gsap.to(el, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.4)' })) as EventListener;
+          el.addEventListener('mousemove', move);
+          el.addEventListener('mouseleave', leave);
+          magnets.push({ el, move, leave });
+        });
+      }
+      function clearMagnetic() {
+        magnets.forEach((m) => {
+          m.el.removeEventListener('mousemove', m.move);
+          m.el.removeEventListener('mouseleave', m.leave);
+          gsap.set(m.el, { clearProps: 'transform' });
+        });
+        magnets = [];
+      }
+
+      let booted = false;
+
+      // Pulls in the ~130 KB motion chunk, then wires everything up. Never
+      // called before first paint.
+      async function boot() {
+        const m = await loadMotion();
+        gsap = m.gsap;
+        ScrollTrigger = m.ScrollTrigger;
+        Lenis = m.Lenis;
+        booted = true;
+
+        startLenis();
+        setupReveals();
+        setupCursor();
+        setupMagnetic();
+        ScrollTrigger.refresh();
+      }
+
+      function teardown() {
+        // May run before the motion chunk ever loaded (fast navigation).
+        if (booted) ScrollTrigger.getAll().forEach((t) => t.kill());
+        lenis?.destroy();
+        lenis = undefined;
+        (window as any).lenis = undefined;
+        cursorCleanup?.();
+        cursorCleanup = null;
+        clearMagnetic();
+      }
+
+      // Initial load — deferred to idle, or to the first real user intent
+      // (scroll/pointer/key), whichever lands first.
+      whenIdleOrIntent(boot);
+
+      // FAILSAFE: reveal content is hidden by `html.js [data-reveal]` until GSAP
+      // reveals it. If the motion chunk never arrives (network failure, blocked
+      // script), dropping the `js` class makes that rule stop matching, so the
+      // page is fully readable instead of silently blank.
+      window.setTimeout(() => {
+        if (!booted) document.documentElement.classList.remove('js');
+      }, 4000);
+
+      document.addEventListener('astro:before-swap', teardown); // no-op without ClientRouter
+      onReady(() => {
+        if (!reduceMotion && !lenis) whenIdleOrIntent(boot);
+      });
+    </script>
+  </body>
+</html>

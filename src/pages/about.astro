@@ -1,0 +1,94 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import StatsBlock from '../components/StatsBlock.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import Reveal from '../components/Reveal.astro';
+import { site } from '../data/site';
+
+const values = [
+  { title: 'Restraint', body: 'The hardest, best decisions are usually about what to leave out. We design by subtraction.' },
+  { title: 'Ownership', body: 'We hold ourselves to outcomes, not hours. If it ships and it works, we did our job.' },
+  { title: 'Craft', body: 'Details compound. We sweat the ones nobody notices — because everybody feels them.' },
+  { title: 'Candour', body: 'Straight answers, early. Good partners disagree well and decide together.' },
+];
+
+// Placeholder roster — swap names / roles for the real team.
+const team = [
+  { name: 'A. Mercer', role: 'Creative Director' },
+  { name: 'R. Haddad', role: 'Design Lead' },
+  { name: 'S. Nakamura', role: 'Engineering Lead' },
+  { name: 'T. Bianchi', role: 'Strategy' },
+];
+
+const pad = (n: number) => String(n + 1).padStart(2, '0');
+---
+
+<BaseLayout title="Studio" description="quiet seven is a small, senior team of designers and engineers.">
+  <!-- Header -->
+  <section class="container-x pt-40 pb-20 md:pt-48">
+    <Reveal class="eyebrow mb-6"><span class="h-px w-8 bg-muted"></span>The studio</Reveal>
+    <h1 class="max-w-5xl text-display-lg font-bold" data-statement>
+      We make quiet work for teams who’d rather be understood than loud.
+    </h1>
+  </section>
+
+  <!-- Story -->
+  <section class="container-x pb-8">
+    <div class="grid gap-10 border-t border-line pt-12 md:grid-cols-12">
+      <Reveal class="md:col-span-4">
+        <p class="flex items-center gap-3">
+          <span class="index-num">01</span>
+          <span class="h-3 w-px bg-line" aria-hidden="true"></span>
+          <span class="eyebrow">Who we are</span>
+        </p>
+      </Reveal>
+      <div class="md:col-span-7 md:col-start-6 space-y-5 text-lg leading-relaxed text-muted">
+        <Reveal as="p">
+          {site.name} is a digital communication studio for branding and development. We’re a
+          small, senior group of designers, writers and engineers who like working on the whole
+          problem — from what a company stands for to the code that expresses it.
+        </Reveal>
+        <Reveal as="p">
+          We believe the best digital work is quiet: it removes friction instead of adding noise,
+          and it earns trust by being clear. That belief shapes everything we make.
+        </Reveal>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="container-x section border-t border-line">
+    <SectionHeading index="02" eyebrow="By the numbers" title="A decade of quiet output." class="mb-14" />
+    <StatsBlock />
+  </section>
+
+  <!-- Values -->
+  <section class="container-x section border-t border-line">
+    <SectionHeading index="03" eyebrow="What we value" title="Four things we don’t compromise on." class="mb-14" />
+    <div class="grid gap-x-8 gap-y-12 md:grid-cols-2">
+      {values.map((v, i) => (
+        <Reveal>
+          <div class="border-t border-line pt-6">
+            <span class="index-num">{pad(i)}</span>
+            <h3 class="mt-2 text-display-sm font-bold">{v.title}</h3>
+            <p class="mt-3 text-muted">{v.body}</p>
+          </div>
+        </Reveal>
+      ))}
+    </div>
+  </section>
+
+  <!-- Team -->
+  <section class="container-x section border-t border-line">
+    <SectionHeading index="04" eyebrow="The team" title="Senior people, start to finish." class="mb-14" />
+    <div class="grid grid-cols-2 gap-x-8 gap-y-10 md:grid-cols-4">
+      {team.map((m) => (
+        <Reveal>
+          <div class="aspect-[3/4] bg-surface border border-line"></div>
+          <p class="mt-4 font-medium">{m.name}</p>
+          <p class="text-sm text-muted">{m.role}</p>
+        </Reveal>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,23 @@
+---
+import Reveal from './Reveal.astro';
+interface Props {
+  eyebrow?: string;
+  title: string;
+  index?: string; // Swiss chapter number, e.g. "02"
+  class?: string;
+}
+const { eyebrow, title, index, class: className = '' } = Astro.props;
+---
+
+<div class={`max-w-3xl ${className}`}>
+  {
+    (eyebrow || index) && (
+      <Reveal class="mb-5 flex items-center gap-3">
+        {index && <span class="index-num">{index}</span>}
+        {index && <span class="h-3 w-px bg-line" aria-hidden="true" />}
+        {eyebrow && <span class="eyebrow">{eyebrow}</span>}
+      </Reveal>
+    )
+  }
+  <Reveal as="h2" class="text-display-md font-bold">{title}</Reveal>
+</div>

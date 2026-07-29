@@ -1,0 +1,48 @@
+---
+// Inline line-icon set (24×24, stroke = currentColor). Add new icons by
+// adding a key to `paths` below.
+interface Props {
+  name: string;
+  class?: string;
+}
+const { name, class: className = '' } = Astro.props;
+
+const paths: Record<string, string> = {
+  // One choice branching into many
+  hicks: `<circle cx="4.5" cy="12" r="1.6"/><path d="M6 12h4.5"/><path d="M10.5 12l5-5.5"/><path d="M10.5 12h5.5"/><path d="M10.5 12l5 5.5"/><circle cx="17.5" cy="6" r="1.6"/><circle cx="18" cy="12" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/>`,
+  // Concentric target + incoming pointer
+  fitts: `<circle cx="10.5" cy="13.5" r="7"/><circle cx="10.5" cy="13.5" r="2.6"/><path d="M21 3l-5.4 5.4"/><path d="M21 3v3.6"/><path d="M21 3h-3.6"/>`,
+  // Two overlapping windows (conventions)
+  jakob: `<rect x="3" y="5.5" width="12" height="10" rx="1.6"/><path d="M3 8.6h12"/><rect x="9" y="9" width="12" height="10" rx="1.6"/><path d="M9 12.1h12"/>`,
+  // Three grouped chunks
+  miller: `<rect x="2.5" y="8" width="5.2" height="8" rx="1.5"/><rect x="9.4" y="8" width="5.2" height="8" rx="1.5"/><rect x="16.3" y="8" width="5.2" height="8" rx="1.5"/>`,
+  // A row of squares with one distinct circle
+  restorff: `<rect x="2.5" y="9.5" width="4.2" height="5" rx="1"/><rect x="8" y="9.5" width="4.2" height="5" rx="1"/><rect x="13.5" y="9.5" width="4.2" height="5" rx="1"/><circle cx="20" cy="12" r="3"/>`,
+  // Sparkle
+  aesthetic: `<path d="M12 3l1.9 6.1L20 11l-6.1 1.9L12 19l-1.9-6.1L4 11l6.1-1.9z"/><path d="M18.5 4.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/>`,
+
+  // ── "How we build" pillars ──
+  // Seal / star — identity
+  brand: `<circle cx="12" cy="12" r="8.5"/><path d="M12 6.6l1.5 3.9 4.1.3-3.2 2.6 1 4-3.4-2.2-3.4 2.2 1-4-3.2-2.6 4.1-.3z"/>`,
+  // Browser frame — the web
+  web: `<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 9.2h19"/><circle cx="5.6" cy="7.1" r="0.7"/><circle cx="8.1" cy="7.1" r="0.7"/>`,
+  // Code brackets — engineering
+  build: `<path d="M8.4 7L3.8 12l4.6 5"/><path d="M15.6 7l4.6 5-4.6 5"/><path d="M13.6 5l-3.2 14"/>`,
+  // Ascending bars — scale
+  scale: `<path d="M3.5 19.5h17"/><rect x="5.5" y="12.5" width="3.2" height="4.5" rx="0.6"/><rect x="10.4" y="8.5" width="3.2" height="8.5" rx="0.6"/><rect x="15.3" y="4.5" width="3.2" height="12.5" rx="0.6"/>`,
+};
+
+const d = paths[name] ?? '';
+---
+
+<svg
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.5"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  class={className}
+  aria-hidden="true"
+  set:html={d}
+/>

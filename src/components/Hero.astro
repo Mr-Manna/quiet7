@@ -1,0 +1,156 @@
+---
+// Full-viewport hero with a staggered line reveal on load and a
+// toggleable Swiss column/baseline grid overlay (button or "G" key).
+interface Props {
+  eyebrow?: string;
+  lines: string[];
+  lead?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+}
+const { eyebrow, lines, lead, ctaLabel, ctaHref } = Astro.props;
+---
+
+<section
+  class="hero relative flex min-h-[92svh] flex-col justify-center overflow-hidden pt-28 pb-20"
+  data-hero
+>
+  <!-- Grid overlay (hidden until toggled) -->
+  <div class="hero-grid" data-hero-grid aria-hidden="true">
+    <div class="hero-grid__baseline"></div>
+    <div class="container-x h-full">
+      <div class="hero-grid__cols hidden h-full gap-x-8 md:grid md:grid-cols-12">
+        {Array.from({ length: 12 }).map(() => <span />)}
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="container-x relative z-10">
+    {eyebrow && (
+      <p class="eyebrow mb-8 overflow-hidden" data-hero-line>
+        <span class="inline-flex items-center gap-2"><span class="h-px w-8 bg-muted"></span>{eyebrow}</span>
+      </p>
+    )}
+
+    <h1 class="text-display-xl font-bold">
+      {lines.map((line) => (
+        <span class="block overflow-hidden py-[0.5vh]" data-hero-line><span class="block">{line}</span></span>
+      ))}
+    </h1>
+
+    <div class="mt-10 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+      {lead && (
+        <p class="max-w-md overflow-hidden text-lg text-muted" data-hero-line>
+          <span class="block">{lead}</span>
+        </p>
+      )}
+      {ctaLabel && ctaHref && (
+        <a href={ctaHref} class="btn-primary self-start overflow-hidden" data-hero-line>
+          <span class="inline-flex items-center gap-2">{ctaLabel} <span aria-hidden="true">→</span></span>
+        </a>
+      )}
+    </div>
+  </div>
+
+  <!-- Grid toggle -->
+  <button
+    type="button"
+    class="hero-grid-toggle absolute bottom-6 right-6 z-20 md:right-10"
+    data-hero-grid-toggle
+    data-magnetic="0.2"
+    aria-pressed="false"
+    aria-label="Toggle layout grid"
+  >
+    <span aria-hidden="true">⊞</span> Grid <span class="hero-grid-toggle__key">G</span>
+  </button>
+</section>
+
+<style>
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+  .hero.grid-on .hero-grid {
+    opacity: 1;
+  }
+  .hero-grid__baseline {
+    position: absolute;
+    inset: 0;
+    opacity: 0.55;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgb(var(--color-line)) 0 1px,
+      transparent 1px 2.25rem
+    );
+  }
+  .hero-grid__cols > span {
+    display: block;
+    height: 100%;
+    background: rgb(var(--color-accent) / 0.05);
+    border-left: 1px solid rgb(var(--color-accent) / 0.16);
+    border-right: 1px solid rgb(var(--color-accent) / 0.16);
+  }
+
+  .hero-grid-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid rgb(var(--color-line));
+    padding: 0.4rem 0.7rem;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgb(var(--color-muted));
+    transition:
+      color 0.3s ease,
+      border-color 0.3s ease;
+    will-change: transform;
+  }
+  .hero-grid-toggle:hover {
+    color: rgb(var(--color-ink));
+    border-color: rgb(var(--color-ink));
+  }
+  .hero.grid-on .hero-grid-toggle {
+    color: rgb(var(--color-accent-text));
+    border-color: rgb(var(--color-accent-text));
+  }
+  .hero-grid-toggle__key {
+    border: 1px solid currentColor;
+    padding: 0 0.3rem;
+    font-size: 10px;
+    line-height: 1.4;
+  }
+</style>
+
+<script>
+  function isTyping(e: KeyboardEvent) {
+    const t = e.target as HTMLElement | null;
+    return !!t && /^(input|textarea|select)$/i.test(t.tagName);
+  }
+  function toggleGrid() {
+    const hero = document.querySelector<HTMLElement>('[data-hero]');
+    if (!hero) return;
+    const on = hero.classList.toggle('grid-on');
+    document.querySelector('[data-hero-grid-toggle]')?.setAttribute('aria-pressed', String(on));
+  }
+  function initHeroGrid() {
+    const btn = document.querySelector<HTMLButtonElement>('[data-hero-grid-toggle]');
+    if (!btn || btn.dataset.ready) return;
+    btn.dataset.ready = '1';
+    btn.addEventListener('click', toggleGrid);
+  }
+
+  // Bind the keyboard shortcut once at module scope.
+  window.addEventListener('keydown', (e) => {
+    if (!isTyping(e) && e.key.toLowerCase() === 'g') toggleGrid();
+  });
+
+  initHeroGrid();
+  document.addEventListener('astro:page-load', initHeroGrid);
+</script>

@@ -1,0 +1,175 @@
+---
+import { scores, vitals, audited } from '../data/quality';
+---
+
+{/* Proof, not a claim: the audit scores for this page, on the page. The vitals
+    are a genuine two-axis dataset (metric x device), so they get a real <table>
+    with scoped headers rather than a grid of divs pretending to be one. */}
+<div class="sq">
+  <ol class="sq__scores">
+    {scores.map((s) => (
+      <li class="sq__score" data-reveal>
+        <span class="sq__num">
+          {s.desktop}
+          {s.mobile !== s.desktop && <i class="sq__alt">/{s.mobile}</i>}
+        </span>
+        <span class="sq__label">{s.label}</span>
+      </li>
+    ))}
+  </ol>
+
+  <div class="sq__tablewrap">
+    <table class="sq__table">
+      <caption class="sq__caption">
+        Core Web Vitals — Lighthouse, production build, {audited}.
+        Two figures mean <strong>desktop / mobile</strong>.
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Metric</th>
+          <th scope="col">Desktop</th>
+          <th scope="col">Mobile</th>
+          <th scope="col">Target</th>
+        </tr>
+      </thead>
+      <tbody>
+        {vitals.map((v) => (
+          <tr>
+            <th scope="row">
+              <span class="sq__abbr">{v.abbr}</span>
+              <span class="sq__metric">{v.metric}</span>
+            </th>
+            <td class="sq__val">{v.desktop}</td>
+            <td class="sq__val">{v.mobile}</td>
+            <td class="sq__target">{v.target}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  .sq {
+    display: grid;
+    gap: clamp(2.5rem, 5vw, 4rem);
+  }
+  @media (min-width: 1000px) {
+    .sq {
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+      gap: clamp(3rem, 6vw, 6rem);
+    }
+  }
+
+  /* ── The four scores ── */
+  .sq__scores {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .sq__score {
+    position: relative;
+    padding-left: clamp(1rem, 2vw, 1.75rem);
+  }
+  .sq__score::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.2em;
+    bottom: 0.2em;
+    width: 1px;
+    background: rgb(var(--color-line));
+  }
+  .sq__num {
+    display: block;
+    font-family: 'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
+    font-size: clamp(3rem, 7vw, 5rem);
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    /* Accent as text on the light page background → must be the deepened token
+       (5.54:1). The bright lime is 1.86:1 here. */
+    color: rgb(var(--color-accent-text));
+    font-variant-numeric: tabular-nums;
+  }
+  .sq__alt {
+    font-style: normal;
+    font-size: 0.42em;
+    letter-spacing: -0.02em;
+    color: rgb(var(--color-muted));
+  }
+  .sq__label {
+    display: block;
+    margin-top: 0.7rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgb(var(--color-muted));
+  }
+
+  /* ── Vitals table ── */
+  .sq__tablewrap {
+    overflow-x: auto; /* never let the table push the page sideways */
+  }
+  .sq__table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+  }
+  .sq__caption {
+    caption-side: bottom;
+    margin-top: 1.25rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: rgb(var(--color-muted));
+    text-align: left;
+  }
+  .sq__table th,
+  .sq__table td {
+    padding: 0.9rem 1rem 0.9rem 0;
+    border-bottom: 1px solid rgb(var(--color-line));
+  }
+  .sq__table thead th {
+    padding-top: 0;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgb(var(--color-muted));
+  }
+  .sq__table tbody th {
+    font-weight: 500;
+  }
+  .sq__abbr {
+    display: block;
+    font-family: 'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: -0.01em;
+    color: rgb(var(--color-ink));
+  }
+  .sq__metric {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.78rem;
+    color: rgb(var(--color-muted));
+  }
+  .sq__val {
+    font-family: 'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: rgb(var(--color-ink));
+    white-space: nowrap;
+  }
+  .sq__target {
+    font-size: 0.85rem;
+    color: rgb(var(--color-muted));
+    white-space: nowrap;
+  }
+</style>

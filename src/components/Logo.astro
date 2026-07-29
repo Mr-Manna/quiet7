@@ -1,0 +1,20 @@
+---
+// Typographic wordmark placeholder. To use a real logo, replace the
+// <span> markup below with an inline <svg> or <img src="/logo.svg" />.
+import { site } from '../data/site';
+
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+---
+
+<a
+  href="/"
+  aria-label={`${site.name} — home`}
+  class={`site-logo group inline-flex items-baseline font-display text-xl font-bold tracking-tight leading-none ${className}`}
+>
+  <span>{site.wordmark.lead}</span>
+  <span class="text-accent-text">&nbsp;{site.wordmark.accent}</span>
+  
+</a>

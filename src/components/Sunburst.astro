@@ -1,0 +1,56 @@
+---
+// Radiating line-burst mark (Image 3). Slow CSS spin; the homepage
+// script draws the rays in via stroke-dashoffset on scroll-in.
+interface Props {
+  rays?: number;
+  class?: string;
+}
+const { rays = 32, class: className = '' } = Astro.props;
+const angles = Array.from({ length: rays }, (_, i) => (i / rays) * 360);
+---
+
+<svg
+  class={`sunburst ${className}`}
+  viewBox="0 0 200 200"
+  fill="none"
+  aria-hidden="true"
+  data-sunburst
+>
+  <g class="sunburst__spin">
+    {
+      angles.map((a) => (
+        <line
+          x1="100"
+          y1="100"
+          x2="100"
+          y2="8"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          transform={`rotate(${a} 100 100)`}
+        />
+      ))
+    }
+  </g>
+</svg>
+
+<style>
+  .sunburst {
+    color: rgb(var(--color-accent));
+    overflow: visible;
+  }
+  .sunburst__spin {
+    transform-origin: 100px 100px;
+    animation: sunburst-spin 44s linear infinite;
+  }
+  @keyframes sunburst-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sunburst__spin {
+      animation: none;
+    }
+  }
+</style>

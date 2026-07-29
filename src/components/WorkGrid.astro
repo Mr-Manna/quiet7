@@ -1,0 +1,17 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import WorkCard from './WorkCard.astro';
+
+interface Props {
+  projects: CollectionEntry<'work'>[];
+}
+const { projects } = Astro.props;
+---
+
+<div class="grid gap-x-8 gap-y-14 md:grid-cols-2">
+  {projects.map((p, i) => (
+    <div class={i % 3 === 0 ? 'md:col-span-2' : ''}>
+      <WorkCard project={p} large={i % 3 === 0} />
+    </div>
+  ))}
+</div>

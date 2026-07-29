@@ -1,0 +1,190 @@
+---
+// 3D ripple water shader (raw WebGL, no libs/CDN). A height-field of
+// travelling + radial waves, lit with a finite-difference normal and a
+// Blinn-Phong specular for a real 3D surface. Ripples emanate from the
+// cursor. Theme-aware (light ↔ dark), legibility-biased top-left, pauses
+// off-screen, freezes for reduced motion, CSS fallback.
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+---
+
+<canvas class={`ripple-canvas ${className}`} data-ripple aria-hidden="true"></canvas>
+
+<style>
+  .ripple-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 0;
+    background:
+      radial-gradient(60% 60% at 78% 18%, rgba(141, 199, 20, 0.22), transparent 60%),
+      #f0f2e6;
+  }
+  :global(:root[data-theme='dark']) .ripple-canvas {
+    background:
+      radial-gradient(60% 60% at 78% 18%, rgba(141, 199, 20, 0.14), transparent 60%),
+      #0b1109;
+  }
+</style>
+
+<script>
+  const VERT = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
+  const FRAG = `
+    precision highp float;
+    uniform float u_time;
+    uniform vec2 u_res;
+    uniform vec2 u_mouse;
+    uniform float u_dark;
+
+    // Height field: travelling waves + radial ripples (mouse + ambient sources).
+    float waveH(vec2 p, vec2 m, float t){
+      float h = 0.0;
+      h += sin(p.x * 7.0 + t * 0.9) * 0.5;
+      h += sin(p.y * 6.0 - t * 0.7) * 0.5;
+      h += sin((p.x + p.y) * 5.0 + t * 0.55) * 0.4;
+
+      float dm = length(p - m);
+      h += sin(dm * 34.0 - t * 4.2) * exp(-dm * 3.5) * 1.9;
+
+      float d1 = length(p - vec2(0.32, 0.72));
+      h += sin(d1 * 28.0 - t * 2.1) * exp(-d1 * 4.0) * 0.7;
+      float d2 = length(p - vec2(1.15, 0.32));
+      h += sin(d2 * 26.0 - t * 1.7) * exp(-d2 * 4.0) * 0.6;
+
+      return h * 0.05;
+    }
+
+    void main(){
+      float aspect = u_res.x / u_res.y;
+      vec2 uv = gl_FragCoord.xy / u_res.xy;
+      vec2 p = vec2(uv.x * aspect, uv.y);
+      vec2 m = vec2(u_mouse.x * aspect, u_mouse.y);
+      float t = u_time;
+
+      // Surface normal via finite differences.
+      float e = 0.0016;
+      float h  = waveH(p, m, t);
+      float hx = waveH(p + vec2(e, 0.0), m, t);
+      float hy = waveH(p + vec2(0.0, e), m, t);
+      vec3 n = normalize(vec3((h - hx) / e, (h - hy) / e, 1.4));
+
+      vec3 lightDir = normalize(vec3(0.55, 0.72, 0.85));
+      vec3 viewDir = vec3(0.0, 0.0, 1.0);
+      vec3 halfV = normalize(lightDir + viewDir);
+      float diff = clamp(dot(n, lightDir), 0.0, 1.0);
+      float spec = pow(clamp(dot(n, halfV), 0.0, 1.0), 42.0);
+
+      vec3 lime = vec3(0.55, 0.78, 0.08);
+
+      // Light palette (keeps the headline area legible)
+      vec3 baseL = vec3(0.945, 0.955, 0.905);
+      vec3 deepL = vec3(0.80, 0.88, 0.72);
+      vec3 colL = mix(deepL, baseL, diff);
+      colL += lime * spec * 0.85;
+      colL += lime * max(h, 0.0) * 0.6;
+      colL = mix(colL, baseL, smoothstep(0.7, 0.0, uv.x + (1.0 - uv.y)) * 0.3);
+
+      // Dark palette
+      vec3 baseD = vec3(0.05, 0.08, 0.058);
+      vec3 deepD = vec3(0.02, 0.04, 0.03);
+      vec3 colD = mix(deepD, baseD, diff);
+      colD += lime * spec * 0.95;
+      colD += lime * max(h, 0.0) * 0.5;
+
+      vec3 col = mix(colL, colD, clamp(u_dark, 0.0, 1.0));
+      gl_FragColor = vec4(col, 1.0);
+    }
+  `;
+
+  function compile(gl: WebGLRenderingContext, type: number, src: string) {
+    const s = gl.createShader(type)!;
+    gl.shaderSource(s, src); gl.compileShader(s); return s;
+  }
+  const isDark = () => document.documentElement.dataset.theme === 'dark';
+
+  function initRipple(canvas: HTMLCanvasElement) {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const gl = (canvas.getContext('webgl', { antialias: false, alpha: false }) ||
+      canvas.getContext('experimental-webgl')) as WebGLRenderingContext | null;
+    if (!gl) return;
+
+    const prog = gl.createProgram()!;
+    gl.attachShader(prog, compile(gl, gl.VERTEX_SHADER, VERT));
+    gl.attachShader(prog, compile(gl, gl.FRAGMENT_SHADER, FRAG));
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+    gl.useProgram(prog);
+
+    const b = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, b);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(prog, 'a');
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+    const uTime = gl.getUniformLocation(prog, 'u_time');
+    const uRes = gl.getUniformLocation(prog, 'u_res');
+    const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+    const uDark = gl.getUniformLocation(prog, 'u_dark');
+
+    let mx = 0.5, my = 0.55, tx = 0.5, ty = 0.55;
+    const onMove = (e: PointerEvent) => {
+      const r = canvas.getBoundingClientRect();
+      tx = (e.clientX - r.left) / r.width;
+      ty = 1 - (e.clientY - r.top) / r.height;
+    };
+    (canvas.parentElement || canvas).addEventListener('pointermove', onMove);
+
+    let dark = isDark() ? 1 : 0;
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const resize = () => {
+      const w = Math.max(1, Math.floor(canvas.clientWidth * dpr));
+      const h = Math.max(1, Math.floor(canvas.clientHeight * dpr));
+      if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; gl.viewport(0, 0, w, h); }
+      gl.uniform2f(uRes, w, h);
+    };
+    const ro = new ResizeObserver(resize); ro.observe(canvas); resize();
+
+    let raf = 0, running = false;
+    const start = performance.now();
+    const draw = (sec: number) => {
+      mx += (tx - mx) * 0.08; my += (ty - my) * 0.08;
+      dark += ((isDark() ? 1 : 0) - dark) * 0.08;
+      gl.uniform2f(uMouse, mx, my);
+      gl.uniform1f(uDark, dark);
+      gl.uniform1f(uTime, sec);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    };
+    const frame = (now: number) => { draw((now - start) / 1000); if (running) raf = requestAnimationFrame(frame); };
+    const play = () => { if (running || reduce) return; running = true; raf = requestAnimationFrame(frame); };
+    const pause = () => { running = false; cancelAnimationFrame(raf); };
+
+    dark = isDark() ? 1 : 0;
+    draw(reduce ? 6 : 0);
+
+    const mo = new MutationObserver(() => { if (!running) { dark = isDark() ? 1 : 0; draw(reduce ? 6 : 0); } });
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+    const io = new IntersectionObserver((ent) => (ent[0].isIntersecting ? play() : pause()), { threshold: 0 });
+    io.observe(canvas);
+
+    document.addEventListener('astro:before-swap', () => {
+      pause(); ro.disconnect(); io.disconnect(); mo.disconnect();
+      (canvas.parentElement || canvas).removeEventListener('pointermove', onMove);
+      gl.getExtension('WEBGL_lose_context')?.loseContext();
+    }, { once: true });
+  }
+
+  function boot() {
+    document.querySelectorAll<HTMLCanvasElement>('[data-ripple]').forEach((c) => {
+      if (c.dataset.ready) return;
+      c.dataset.ready = '1';
+      try { initRipple(c); } catch (e) { console.error('[ripple]', e); }
+    });
+  }
+  document.addEventListener('astro:page-load', boot);
+</script>

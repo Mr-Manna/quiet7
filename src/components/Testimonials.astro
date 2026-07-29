@@ -1,0 +1,20 @@
+---
+import Reveal from './Reveal.astro';
+import { testimonials } from '../data/testimonials';
+---
+
+<div class="grid gap-8 md:grid-cols-3">
+  {testimonials.map((t) => (
+    <Reveal>
+      <figure class="flex h-full flex-col justify-between border border-line bg-surface p-8">
+        <blockquote class="text-lg leading-relaxed">
+          <span class="font-display text-accent-text">“</span>{t.quote}
+        </blockquote>
+        <figcaption class="mt-8 border-t border-line pt-5">
+          <p class="font-medium">{t.name}</p>
+          <p class="text-sm text-muted">{t.role}, {t.company}</p>
+        </figcaption>
+      </figure>
+    </Reveal>
+  ))}
+</div>

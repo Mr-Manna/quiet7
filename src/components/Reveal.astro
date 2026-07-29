@@ -1,0 +1,16 @@
+---
+// Scroll-reveal wrapper. Marks its children with [data-reveal]; the
+// global animation runtime (BaseLayout) animates them into view via
+// GSAP ScrollTrigger. Falls back to visible when motion is reduced.
+interface Props {
+  as?: keyof HTMLElementTagNameMap;
+  delay?: number; // seconds
+  class?: string;
+}
+const { as = 'div', delay = 0, class: className = '' } = Astro.props;
+const Tag = as;
+---
+
+<Tag data-reveal data-reveal-delay={delay} class={className}>
+  <slot />
+</Tag>
