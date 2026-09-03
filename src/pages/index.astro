@@ -10,7 +10,7 @@ import SiteQuality from '../components/SiteQuality.astro';
 import RealProblem from '../components/RealProblem.astro';
 import { getCollection } from 'astro:content';
 import { services } from '../data/services';
-import { marqueeItems, testimonials } from '../data/testimonials';
+import { marqueeItems } from '../data/testimonials';
 import { site } from '../data/site';
 
 const projects = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
@@ -18,7 +18,6 @@ const articles = (await getCollection('journal'))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 3);
 const fmtDate = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-const [leadQuote, ...restQuotes] = testimonials;
 const pad = (n: number) => String(n + 1).padStart(2, '0');
 const total = pad(projects.length - 1);
 
@@ -165,7 +164,7 @@ const process = [
       </div>
     </section>
 
-    <!-- ══ TESTIMONIALS (editorial) ══ -->
+    {/* ══ TESTIMONIALS (editorial) — hidden for now ══
     <section class="container-x section border-t border-line">
       <p class="hx-eyebrow mb-10"><BracketLabel text="Kind words" /></p>
       <div class="hx-quotes">
@@ -193,6 +192,7 @@ const process = [
         </div>
       </div>
     </section>
+    */}
 
     <!-- ══ SITE QUALITY (proof) ══ -->
     <section class="container-x section border-t border-line">
