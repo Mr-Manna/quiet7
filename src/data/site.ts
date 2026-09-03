@@ -13,10 +13,10 @@ export const site = {
   seoTagline: 'Digital communication studio',
   description:
     'Quiet Seven is a digital communication studio. We craft brands, digital experiences and the software that carries them — considered, restrained, built to last.',
-  email: 'hello@quietseven.studio',
-  phone: '+1 (555) 070-0007',
+  email: 'hello@quietseven.com',
+  phone: '+91 94772 86372',
   location: 'Remote-first · Kolkata / India',
-  address: '7 Quietude Lane, Suite 700',
+  address: '',
 } as const;
 
 export const nav = [
