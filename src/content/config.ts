@@ -14,6 +14,7 @@ const work = defineCollection({
     // Cover + gallery images live in /public (string paths) so they are
     // trivial to swap. Replace with real photography/renders.
     cover: z.string(),
+    banner: z.string(),
     accent: z.string().optional(), // per-project accent for the cover
     images: z.array(z.string()).default([]),
     services: z.array(z.string()).default([]),
