@@ -15,17 +15,6 @@ const isActive = (href: string) =>
       <Logo />
 
       <div class="topbar__right">
-        <span
-          class="hidden items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-muted md:inline-flex"
-          data-status
-        >
-          <span class="relative flex h-2 w-2">
-            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60"></span>
-            <span class="relative inline-flex h-2 w-2 rounded-full bg-accent"></span>
-          </span>
-          Available for projects
-        </span>
-
         <ThemeToggle />
 
         <button
@@ -199,17 +188,31 @@ const isActive = (href: string) =>
       background-color 0.3s ease,
       color 0.3s ease;
   }
-  /* The brand dot, echoing the wordmark and the favicon. */
+  /* The brand dot, echoing the wordmark and the favicon.
+     It rides a fixed radius around the logo centre. --dot-angle (set from JS)
+     ticks 45deg clockwise each time a new section reaches the middle of the
+     viewport, and back anti-clockwise on the way up. 45deg is the rest
+     position — top-right, where the favicon's dot sits. */
   .floatbar__logo::after {
     content: '';
     position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
+    top: 50%;
+    left: 50%;
     width: 0.3rem;
     height: 0.3rem;
+    margin: -0.15rem 0 0 -0.15rem;
     border-radius: 999px;
     background: rgb(var(--color-accent));
-    transition: background-color 0.3s ease;
+    transform: rotate(var(--dot-angle, 45deg)) translateY(-0.78rem);
+    transition:
+      transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 0.3s ease;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .floatbar__logo::after {
+      transform: rotate(45deg) translateY(-0.78rem);
+      transition: background-color 0.3s ease;
+    }
   }
   .floatbar__logo:hover {
     background: rgb(var(--color-accent));
@@ -266,7 +269,6 @@ const isActive = (href: string) =>
   header.is-open .menu-btn__bar[data-bar='bot'] { bottom: 5px; width: 24px; transform: rotate(-45deg); }
 
   /* ── Open state (top-bar controls sit over the dark overlay) ── */
-  header.is-open [data-status] { opacity: 0; }
   header.is-open .topbar .menu-btn { color: rgb(var(--forest-ink)); }
   header.is-open .topbar :global(.site-logo) { color: rgb(var(--forest-ink)); }
   header.is-open .topbar :global(.theme-toggle) { color: rgb(var(--forest-ink)); }
@@ -498,6 +500,32 @@ const isActive = (href: string) =>
     const onScroll = () => floatbar?.classList.toggle('is-visible', window.scrollY > 120);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Brand dot: one 45deg step per section. The dot's step = the index of the
+    // section currently crossing the middle of the viewport, so scrolling into
+    // the next section ticks it clockwise and scrolling back up ticks it
+    // anti-clockwise. Starts at step 0 (45deg = the favicon's dot position).
+    const floatbarLogo = header.querySelector<HTMLElement>('.floatbar__logo');
+    const sections = Array.from(document.querySelectorAll<HTMLElement>('main section'));
+    if (!reduce && floatbarLogo && sections.length) {
+      let dotStep = 0;
+      const setStep = (idx: number) => {
+        if (idx === dotStep) return;
+        dotStep = idx;
+        floatbarLogo.style.setProperty('--dot-angle', `${45 + idx * 45}deg`);
+      };
+      // rootMargin collapses the viewport to a 1px line at its vertical centre,
+      // so exactly one section intersects at a time — the "current" one.
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) setStep(sections.indexOf(e.target as HTMLElement));
+          }
+        },
+        { rootMargin: '-50% 0px -50% 0px' },
+      );
+      sections.forEach((s) => io.observe(s));
+    }
 
     // Magnetic on menu toggles (fine pointers, motion only).
     // Called from whenIdleOrIntent() once `gsap` is available.

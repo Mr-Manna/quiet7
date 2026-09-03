@@ -147,15 +147,18 @@ const process = [
             <h2 class="hx-work__heading">Quiet work, loud results.</h2>
             <span class="hx-work__hint">Scroll →</span>
           </div>
+          {/* Case-study detail pages aren't built yet — restore the
+              <a href={`/work/${p.id}`} ... data-cursor-label="View"> wrapper
+              once /work/[slug] ships. */}
           {projects.map((p, i) => (
-            <a href={`/work/${p.id}`} class="hx-card" data-cursor-label="View" data-tilt>
+            <div class="hx-card" data-tilt>
               <span class="hx-card__no">{pad(i)} <i>/ {total}</i></span>
               <CrossImage src={p.data.cover} alt={p.data.client} variant={crossVariants[i % crossVariants.length]} class="hx-card__img" />
               <div class="hx-card__foot">
                 <span class="hx-card__client">{p.data.client}</span>
                 <BracketLabel text={p.data.category} scramble={false} class="hx-card__cat" />
               </div>
-            </a>
+            </div>
           ))}
           <a href="/work" class="hx-card hx-card--all"><span>View<br />all work</span><span aria-hidden="true">→</span></a>
         </div>
@@ -394,8 +397,7 @@ const process = [
      The lighter weight is what separates it from the index now, not the colour. */
   .hx-card__no i { font-style: normal; font-weight: 400; color: rgb(var(--color-muted)); }
   .hx-card__foot { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
-  .hx-card__client { font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; font-size: clamp(1.3rem, 2vw, 1.85rem); letter-spacing: -0.02em; transition: color 0.3s; }
-  .hx-card:hover .hx-card__client { color: rgb(var(--color-accent-text)); }
+  .hx-card__client { font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; font-size: clamp(1.3rem, 2vw, 1.85rem); letter-spacing: -0.02em; }
   .hx-card__cat { font-size: 0.7rem !important; }
   /* Dark panel: restore the BRIGHT lime (the deepened token is for light bgs). */
   .hx-card--all { --color-accent-text: var(--color-accent); justify-content: center; align-items: flex-start; gap: 1.5rem; width: clamp(13rem, 20vw, 18rem); padding: 2rem; background: rgb(var(--forest)); color: rgb(var(--forest-ink)); border-radius: 12px; }

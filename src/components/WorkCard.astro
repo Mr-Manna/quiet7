@@ -11,27 +11,27 @@ const { data } = project;
 ---
 
 <Reveal>
-  <a href={`/work/${project.id}`} class="group block" data-cursor-label="View">
+  {/* Case-study detail pages aren't built yet — cards are non-interactive for
+      now. Re-wrap in <a href={`/work/${project.id}`} class="group block"
+      data-cursor-label="View"> (and restore the ↗ badge + group-hover cues)
+      once /work/[slug] ships. */}
+  <div class="block">
     <div class="relative overflow-hidden bg-surface" style={`--proj-accent:${data.accent ?? 'var(--color-accent)'}`}>
       <div class={`overflow-hidden ${large ? 'aspect-[16/10]' : 'aspect-[4/3]'}`}>
         <img
-          src={data.cover}
+          src={data.banner}
           alt={`${data.client} — ${data.title}`}
           loading="lazy"
           decoding="async"
           data-parallax
-          class="h-[112%] w-full -translate-y-[6%] object-cover transition-transform duration-700 ease-smooth group-hover:scale-[1.03]"
+          class="h-[112%] w-full -translate-y-[6%] object-cover"
         />
       </div>
-      <span
-        class="pointer-events-none absolute right-4 top-4 flex h-11 w-11 translate-y-2 items-center justify-center bg-ink text-bg opacity-0 transition-all duration-300 ease-smooth group-hover:translate-y-0 group-hover:opacity-100"
-        aria-hidden="true"
-      >↗</span>
     </div>
 
     <div class="mt-5 flex items-start justify-between gap-4">
       <div>
-        <h3 class="text-display-sm font-bold transition-colors duration-300 group-hover:text-accent-text">
+        <h3 class="text-display-sm font-bold">
           {data.client}
         </h3>
         <p class="mt-1 text-muted">{data.summary}</p>
@@ -40,5 +40,5 @@ const { data } = project;
         {data.category}
       </span>
     </div>
-  </a>
+  </div>
 </Reveal>

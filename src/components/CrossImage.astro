@@ -28,7 +28,8 @@ const rects = shapes[variant] ?? shapes.cross;
       {rects.map((r) => <rect x={r.x} y={r.y} width={r.w} height={r.h} rx="0.05" ry="0.042" />)}
     </clipPath>
   </svg>
-  <img src={src} alt={alt} loading="lazy" decoding="async" style={`clip-path:url(#${id})`} />
+  <!-- <img src={src} alt={alt} loading="lazy" decoding="async" style={`clip-path:url(#${id})`} /> -->
+  <img src={src} alt={alt} loading="lazy" decoding="async" style="object-position: top;height: 500px;" />
 </div>
 
 <style>

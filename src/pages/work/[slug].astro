@@ -4,11 +4,15 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Reveal from '../../components/Reveal.astro';
 
 export async function getStaticPaths() {
-  const projects = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
-  return projects.map((project, i) => ({
-    params: { slug: project.id },
-    props: { project, next: projects[(i + 1) % projects.length] },
-  }));
+  // Case-study detail pages are on hold — no routes are emitted, so /work/<slug>
+  // 404s and stays out of the sitemap. The template below is kept intact; to
+  // ship, restore the mapping:
+  //   const projects = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+  //   return projects.map((project, i) => ({
+  //     params: { slug: project.id },
+  //     props: { project, next: projects[(i + 1) % projects.length] },
+  //   }));
+  return [];
 }
 
 const { project, next } = Astro.props;

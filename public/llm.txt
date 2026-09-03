@@ -5,24 +5,25 @@ Quiet Seven is a digital communication studio crafting brands, digital experienc
 ## Core pages
 
 - Home: /
-- Work (case studies): /work
+- Work: /work
 - Services: /services
 - Journal (articles): /journal
 - Studio / About: /about
 - Contact: /contact
 
-## Work case studies
+## Work
 
-- Atlas Mobility — shared-mobility platform: /work/atlas-mobility
-- Cadence Health — health-tech brand: /work/cadence-health
-- LedgerLine — fintech dashboard: /work/ledgerline
-- Northwind — e-commerce re-platform: /work/northwind
+Selected projects: ICF — Industrial Consultancy Firm (brand & website for a
+pan-India manufacturing project consultancy), Atlas Mobility (shared-mobility
+platform), Cadence Health (health-tech brand), LedgerLine (fintech dashboard),
+Northwind (e-commerce re-platform). Individual case-study pages are in progress.
 
 ## Services
 
 1. Brand & Identity — strategy, visual identity, naming, guidelines, art direction
 2. Digital & Product Design — UX research, web & marketing sites, product UI, design systems, motion
 3. Development — web dev, native & cross-platform apps, headless CMS & commerce, APIs, performance & accessibility
+4. Marketing & Media — digital marketing & campaigns, performance & social advertising, ad films & motion production, jingles & sonic branding, content & channel strategy
 
 ## Journal
 
