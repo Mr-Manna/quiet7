@@ -1,6 +1,11 @@
 ---
-// Typographic wordmark placeholder. To use a real logo, replace the
-// <span> markup below with an inline <svg> or <img src="/logo.svg" />.
+// Wordmark. "quiet" is set in a hairline weight and opened up, "seven" is set
+// bold and tight, and a drawn lime dot closes it like a full stop. The word
+// performs its own meaning; the one bright element is the brand's recurring dot.
+//
+// Text is data-driven from src/data/site.ts (site.wordmark); colour is the
+// shared token set (--color-ink, --color-accent). Nothing is drawn — it is
+// Space Grotesk, already loaded site-wide.
 import { site } from '../data/site';
 
 interface Props {
@@ -12,9 +17,35 @@ const { class: className = '' } = Astro.props;
 <a
   href="/"
   aria-label={`${site.name} — home`}
-  class={`site-logo group inline-flex items-baseline font-display text-xl font-bold tracking-tight leading-none ${className}`}
+  class={`site-logo group font-display text-xl leading-none ${className}`}
 >
-  <span>{site.wordmark.lead}</span>
-  <span class="text-accent-text">&nbsp;{site.wordmark.accent}</span>
-  
+  <span class="site-logo__lead">{site.wordmark.lead}&nbsp;</span>
+  <span class="site-logo__accent">{site.wordmark.accent}</span>
+  <span class="site-logo__dot" aria-hidden="true"></span>
 </a>
+
+<style>
+  .site-logo {
+    display: inline-flex;
+    align-items: baseline;
+    white-space: nowrap;
+    color: rgb(var(--color-ink));
+  }
+  .site-logo__lead {
+    font-weight: 300;
+    letter-spacing: 0.015em;
+  }
+  .site-logo__accent {
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+  /* A circle, not the period glyph, so it stays the brand dot at every size. */
+  .site-logo__dot {
+    flex: none;
+    width: 0.15em;
+    height: 0.15em;
+    margin-left: 0.14em;
+    border-radius: 9999px;
+    background: rgb(var(--color-accent));
+  }
+</style>

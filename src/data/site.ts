@@ -4,7 +4,8 @@
 // ──────────────────────────────────────────────────────────────
 export const site = {
   name: 'Quiet Seven',
-  // The wordmark renders "quiet" + accented "seven"; see Logo.astro
+  // Wordmark: "quiet" set light, "seven" set bold, closed with the lime brand
+  // dot. `lead` / `accent` are the two words; see Logo.astro for the treatment.
   wordmark: { lead: 'quiet', accent: 'seven' },
   tagline: 'A digital communication studio for branding & development.',
   // Short form for the <title> only. The full tagline pushes the homepage title
