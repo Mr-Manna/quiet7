@@ -23,6 +23,7 @@ Quiet Seven is a digital communication studio crafting brands, digital experienc
 1. Brand & Identity — strategy, visual identity, naming, guidelines, art direction
 2. Digital & Product Design — UX research, web & marketing sites, product UI, design systems, motion
 3. Development — web dev, native & cross-platform apps, headless CMS & commerce, APIs, performance & accessibility
+4. Marketing & Media — digital marketing & campaigns, performance & social advertising, ad films & motion production, jingles & sonic branding, content & channel strategy
 
 ## Journal
 

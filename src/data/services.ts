@@ -1,4 +1,4 @@
-// The three core offerings. Edit copy / add capabilities here.
+// The core offerings. Edit copy / add capabilities here.
 export interface Service {
   no: string;
   title: string;
@@ -49,5 +49,19 @@ export const services: Service[] = [
       'Performance & accessibility',
     ],
     tools: ['React', 'Astro', 'Node', 'Swift', 'Kotlin', 'Flutter'],
+  },
+  {
+    no: '04',
+    title: 'Marketing & Media',
+    summary:
+      'We take the brand to market — campaigns, film and sound that carry the same craft as the identity behind them.',
+    capabilities: [
+      'Digital marketing & campaigns',
+      'Performance & social advertising',
+      'Ad films & motion production',
+      'Jingles & sonic branding',
+      'Content & channel strategy',
+    ],
+    tools: ['Meta Ads', 'Google Ads', 'Premiere Pro', 'After Effects', 'Ableton Live'],
   },
 ];

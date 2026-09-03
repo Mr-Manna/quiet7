@@ -15,17 +15,6 @@ const isActive = (href: string) =>
       <Logo />
 
       <div class="topbar__right">
-        <span
-          class="hidden items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-muted md:inline-flex"
-          data-status
-        >
-          <span class="relative flex h-2 w-2">
-            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60"></span>
-            <span class="relative inline-flex h-2 w-2 rounded-full bg-accent"></span>
-          </span>
-          Available for projects
-        </span>
-
         <ThemeToggle />
 
         <button
@@ -280,7 +269,6 @@ const isActive = (href: string) =>
   header.is-open .menu-btn__bar[data-bar='bot'] { bottom: 5px; width: 24px; transform: rotate(-45deg); }
 
   /* ── Open state (top-bar controls sit over the dark overlay) ── */
-  header.is-open [data-status] { opacity: 0; }
   header.is-open .topbar .menu-btn { color: rgb(var(--forest-ink)); }
   header.is-open .topbar :global(.site-logo) { color: rgb(var(--forest-ink)); }
   header.is-open .topbar :global(.theme-toggle) { color: rgb(var(--forest-ink)); }
