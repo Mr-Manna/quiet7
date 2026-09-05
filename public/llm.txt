@@ -24,6 +24,7 @@ Northwind (e-commerce re-platform). Individual case-study pages are in progress.
 2. Digital & Product Design — UX research, web & marketing sites, product UI, design systems, motion
 3. Development — web dev, native & cross-platform apps, headless CMS & commerce, APIs, performance & accessibility
 4. Marketing & Media — digital marketing & campaigns, performance & social advertising, ad films & motion production, jingles & sonic branding, content & channel strategy
+5. Applied AI — AI-assisted concepting, motion drafts, copy and code scaffolding; every draft is reviewed and finished by hand
 
 ## Journal
 

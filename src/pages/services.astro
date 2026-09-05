@@ -4,6 +4,9 @@ import ServicesList from '../components/ServicesList.astro';
 import SectionHeading from '../components/SectionHeading.astro';
 import Marquee from '../components/Marquee.astro';
 import Reveal from '../components/Reveal.astro';
+import TileGrid from '../components/TileGrid.astro';
+import FAQAccordion from '../components/FAQAccordion.astro';
+import { faqs } from '../data/faqs';
 
 const process = [
   { no: '01', title: 'Understand', body: 'We start with the business, not the pixels. Research, interviews, and a shared definition of what success actually looks like.' },
@@ -55,33 +58,6 @@ const stack = [
   { group: 'Back-end', tools: ['Node', 'TypeScript', 'Postgres', 'Prisma'] },
   { group: 'Platforms', tools: ['Vercel', 'Sanity', 'Shopify', 'Webflow'] },
 ];
-
-const faqs = [
-  {
-    q: 'How long does a typical project take?',
-    a: 'Most engagements run six to fourteen weeks, depending on scope. A focused brand sprint can be three; a full rebrand plus platform build is closer to four months. We give you a realistic range before you commit — not an optimistic one.',
-  },
-  {
-    q: 'How do you price work?',
-    a: 'Fixed fee against a fixed scope, agreed up front. You will know the number before we start, and it does not move unless the scope does. Retainers are billed monthly for a reserved block of team time.',
-  },
-  {
-    q: 'Can you do just the design, or just the build?',
-    a: 'Yes. Plenty of clients bring us in for one or the other. That said, the work is usually stronger when design and engineering sit together from day one — it is the main reason we keep both in-house.',
-  },
-  {
-    q: 'Do you work alongside in-house teams?',
-    a: 'Often. We can lead, or we can embed and support — running the system while your team runs the product. We document everything so nothing depends on us being in the room.',
-  },
-  {
-    q: 'What happens after launch?',
-    a: 'Every project includes a support window after go-live, and we hand over documentation your team can actually use. Many clients then move onto a light retainer so the work keeps improving instead of quietly decaying.',
-  },
-  {
-    q: 'Where are you based?',
-    a: 'We are remote-first across New York and Berlin, which means we overlap comfortably with most of North America and Europe. Timezone has never been the hard part — clarity is.',
-  },
-];
 ---
 
 <BaseLayout
@@ -132,28 +108,16 @@ const faqs = [
       title="Three ways to bring us in."
       class="mb-14"
     />
-    <div class="grid gap-px border border-line bg-line md:grid-cols-3">
-      {engagements.map((e) => (
-        <Reveal>
-          <article class="eng flex h-full flex-col bg-bg p-8 md:p-10">
-            <span class="index-num">{e.no}</span>
-            <h3 class="mt-3 text-display-sm font-bold">{e.name}</h3>
-            <p class="mt-2 text-xs font-medium uppercase tracking-[0.16em] text-accent-text">
-              {e.bestFor}
-            </p>
-            <p class="mt-5 flex-1 text-muted">{e.body}</p>
-            <ul class="mt-7 space-y-2 border-t border-line pt-5">
-              {e.details.map((d) => (
-                <li class="flex items-start gap-3 text-sm">
-                  <span class="mt-[0.55em] h-1 w-1 shrink-0 rounded-full bg-accent"></span>
-                  <span>{d}</span>
-                </li>
-              ))}
-            </ul>
-          </article>
-        </Reveal>
-      ))}
-    </div>
+    <TileGrid
+      columns={3}
+      items={engagements.map((e) => ({
+        index: e.no,
+        eyebrow: e.bestFor,
+        title: e.name,
+        body: e.body,
+        meta: e.details,
+      }))}
+    />
   </section>
 
   <!-- 04 — Deliverables -->
@@ -218,103 +182,9 @@ const faqs = [
         <SectionHeading index="07" eyebrow="Questions" title="Before you ask." />
       </div>
       <div class="md:col-span-8">
-        <div class="border-t border-line">
-          {faqs.map((f) => (
-            <Reveal>
-              <details class="faq">
-                <summary class="faq__q">
-                  <span>{f.q}</span>
-                  <span class="faq__icon" aria-hidden="true"></span>
-                </summary>
-                <div class="faq__a">
-                  <p>{f.a}</p>
-                </div>
-              </details>
-            </Reveal>
-          ))}
-        </div>
+        <FAQAccordion items={faqs} />
       </div>
     </div>
   </section>
 </BaseLayout>
 
-<style>
-  /* Engagement cards */
-  .eng {
-    transition: background-color 0.4s ease;
-  }
-  .eng:hover {
-    background: rgb(var(--color-surface));
-  }
-
-  /* FAQ accordion (native <details>, no JS) */
-  .faq {
-    border-bottom: 1px solid rgb(var(--color-line));
-  }
-  .faq__q {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 2rem;
-    padding: 1.5rem 0;
-    cursor: pointer;
-    list-style: none;
-    font-family: 'Space Grotesk Variable', sans-serif;
-    font-weight: 700;
-    font-size: clamp(1.1rem, 2vw, 1.45rem);
-    letter-spacing: -0.02em;
-    transition: color 0.3s ease;
-  }
-  .faq__q::-webkit-details-marker {
-    display: none;
-  }
-  .faq__q:hover {
-    color: rgb(var(--color-accent-text));
-  }
-  .faq__icon {
-    position: relative;
-    flex: none;
-    width: 1rem;
-    height: 1rem;
-  }
-  .faq__icon::before,
-  .faq__icon::after {
-    content: '';
-    position: absolute;
-    /* UI icon → needs 3:1. Bright lime is only 1.86:1 on the light bg. */
-    background: rgb(var(--color-accent-text));
-    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .faq__icon::before {
-    left: 0;
-    top: 50%;
-    width: 100%;
-    height: 2px;
-    transform: translateY(-50%);
-  }
-  .faq__icon::after {
-    top: 0;
-    left: 50%;
-    width: 2px;
-    height: 100%;
-    transform: translateX(-50%);
-  }
-  /* plus → minus */
-  .faq[open] .faq__icon::after {
-    transform: translateX(-50%) rotate(90deg);
-  }
-  .faq__a {
-    max-width: 46rem;
-    padding-bottom: 1.75rem;
-    color: rgb(var(--color-muted));
-    line-height: 1.65;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .faq__icon::before,
-    .faq__icon::after,
-    .eng {
-      transition: none;
-    }
-  }
-</style>

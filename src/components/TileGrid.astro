@@ -1,0 +1,100 @@
+---
+// Generic Swiss hairline tile grid — one canonical implementation shared by
+// capabilities, engagement-model and values sections, instead of each page
+// hand-rolling its own copy of the `grid gap-px border border-line bg-line`
+// convention (see Principles.astro for the original pattern this generalizes).
+import Reveal from './Reveal.astro';
+import Icon from './Icon.astro';
+
+interface Tile {
+  icon?: string;
+  index?: string;
+  eyebrow?: string;
+  title: string;
+  body: string;
+  meta?: string[];
+  href?: string;
+}
+interface Props {
+  items: Tile[];
+  columns?: 2 | 3 | 4 | 5;
+}
+const { items, columns = 3 } = Astro.props;
+
+const colClass = {
+  2: 'lg:grid-cols-2',
+  3: 'lg:grid-cols-3',
+  4: 'lg:grid-cols-4',
+  5: 'lg:grid-cols-5',
+}[columns];
+---
+
+<div class={`grid gap-px border border-line bg-line md:grid-cols-2 ${colClass}`}>
+  {
+    items.map((t) => {
+      const Tag = t.href ? 'a' : 'article';
+      return (
+        <Reveal>
+          <Tag
+            href={t.href}
+            class="tile group flex h-full flex-col bg-bg p-8 md:p-10"
+          >
+            {(t.index || t.icon) && (
+              <div class="flex items-start justify-between">
+                {t.index && <span class="index-num text-lg">{t.index}</span>}
+                {t.icon && (
+                  <span class="tile__icon">
+                    <Icon name={t.icon} class="h-6 w-6" />
+                  </span>
+                )}
+              </div>
+            )}
+            <h3 class:list={['text-display-sm font-bold', (t.index || t.icon) ? 'mt-3' : '']}>
+              {t.title}
+            </h3>
+            {t.eyebrow && (
+              <p class="mt-2 text-xs font-medium uppercase tracking-[0.16em] text-accent-text">
+                {t.eyebrow}
+              </p>
+            )}
+            <p class:list={['flex-1 text-muted', t.eyebrow ? 'mt-5' : 'mt-4']}>{t.body}</p>
+            {t.meta && (
+              <ul class="mt-7 space-y-2 border-t border-line pt-5">
+                {t.meta.map((m) => (
+                  <li class="flex items-start gap-3 text-sm">
+                    <span class="mt-[0.55em] h-1 w-1 shrink-0 rounded-full bg-accent" />
+                    <span>{m}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Tag>
+        </Reveal>
+      );
+    })
+  }
+</div>
+
+<style>
+  .tile {
+    transition: background-color 0.4s ease;
+  }
+  .tile:hover {
+    background-color: rgb(var(--color-surface));
+  }
+  .tile__icon {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid rgb(var(--color-line));
+    color: rgb(var(--color-ink));
+    transition:
+      color 0.4s ease,
+      border-color 0.4s ease;
+  }
+  .tile:hover .tile__icon {
+    color: rgb(var(--color-accent-text));
+    border-color: rgb(var(--color-accent-text));
+  }
+</style>

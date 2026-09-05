@@ -3,6 +3,9 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import WorkGrid from '../../components/WorkGrid.astro';
 import Reveal from '../../components/Reveal.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import TileGrid from '../../components/TileGrid.astro';
+import { services } from '../../data/services';
 
 const projects = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
 ---
@@ -25,5 +28,13 @@ const projects = (await getCollection('work')).sort((a, b) => a.data.order - b.d
       <span class="tabular-nums text-sm text-muted">{String(projects.length).padStart(2, '0')} projects</span>
     </Reveal>
     <WorkGrid projects={projects} />
+  </section>
+
+  <section class="container-x section border-t border-line">
+    <SectionHeading index="02" eyebrow="What we bring" title="What every project gets." class="mb-14" />
+    <TileGrid
+      columns={5}
+      items={services.map((s) => ({ index: s.no, title: s.title, body: s.summary }))}
+    />
   </section>
 </BaseLayout>

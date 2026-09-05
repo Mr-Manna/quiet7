@@ -8,9 +8,13 @@ import Principles from '../components/Principles.astro';
 import StatsBlock from '../components/StatsBlock.astro';
 import SiteQuality from '../components/SiteQuality.astro';
 import RealProblem from '../components/RealProblem.astro';
+import TileGrid from '../components/TileGrid.astro';
+import FAQAccordion from '../components/FAQAccordion.astro';
+import Reveal from '../components/Reveal.astro';
 import { getCollection } from 'astro:content';
 import { services } from '../data/services';
 import { marqueeItems } from '../data/testimonials';
+import { homeFaqs } from '../data/faqs';
 import { site } from '../data/site';
 
 const projects = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
@@ -42,7 +46,7 @@ const process = [
       <HeroCanvas />
 
       <div class="container-x hx-hero__inner">
-        <p class="hx-hero__kicker" data-hero-fade><BracketLabel text="Digital communication studio" /></p>
+        <p class="hx-hero__kicker" data-hero-fade><BracketLabel text="AI-assisted digital studio" /></p>
         <h1 class="hx-hero__title" data-hero-parallax>
           <span class="k-line"><span class="k-line__i" data-hero-line-inner>We turn complexity</span></span>
           <span class="k-line"><span class="k-line__i" data-hero-line-inner>into <em>clarity.</em></span></span>
@@ -92,20 +96,44 @@ const process = [
     <!-- ══ HOW WE BUILD ══ -->
     <HowWeBuild />
 
-    <!-- ══ SERVICES ══ -->
-    <section class="container-x section">
-      <p class="hx-eyebrow mb-10"><BracketLabel text="Capabilities" /></p>
-      <div class="hx-srv-list">
-        {services.map((s) => (
-          <a href="/services" class="hx-srv" data-reveal data-cursor-label="More">
-            <span class="hx-srv__no">{s.no}</span>
-            <span class="hx-srv__title">{s.title}</span>
-            <span class="hx-srv__desc">{s.summary}</span>
-            <span class="hx-srv__tags">{s.tools.slice(0, 3).map((t) => <BracketLabel text={t} scramble={false} />)}</span>
-            <span class="hx-srv__arrow" aria-hidden="true">↗</span>
-          </a>
-        ))}
+    <!-- ══ HOW WE USE AI ══ -->
+    <section class="container-x section hx-ai">
+      <div class="hx-stats-head">
+        <p class="hx-eyebrow"><BracketLabel text="How we use AI" /></p>
+        <h2 class="hx-h2" data-words>Real tools, used where they help.</h2>
       </div>
+      <div class="hx-ai__body">
+        <Reveal as="p" class="hx-ai__lead">
+          We use AI the way we use any tool — where it earns its place. It drafts faster,
+          explores more directions, and clears the boring parts of the job, so the team
+          spends its time on the decisions that actually need a person: what to keep,
+          what to cut, and whether it's any good.
+        </Reveal>
+        <Reveal as="ul" class="hx-ai__tags">
+          <li>AI-assisted design & concepting</li>
+          <li>AI-assisted video & motion</li>
+          <li>AI-assisted content & marketing</li>
+          <li>AI-assisted development</li>
+        </Reveal>
+      </div>
+    </section>
+
+    <!-- ══ SERVICES ══ -->
+    <section class="container-x section border-t border-line">
+      <p class="hx-eyebrow mb-10"><BracketLabel text="Capabilities" /></p>
+      <TileGrid
+        columns={5}
+        items={services.map((s) => ({ index: s.no, title: s.title, body: s.summary, href: '/services' }))}
+      />
+    </section>
+
+    <!-- ══ FAQ ══ -->
+    <section class="container-x section border-t border-line">
+      <div class="hx-stats-head">
+        <p class="hx-eyebrow"><BracketLabel text="Questions" /></p>
+        <h2 class="hx-h2" data-words>Before you ask.</h2>
+      </div>
+      <FAQAccordion items={homeFaqs} />
     </section>
 
     <!-- ══ UX PSYCHOLOGY ══ -->
@@ -356,19 +384,12 @@ const process = [
 
   /* ══ FOREST ══ */
 
-  /* ══ SERVICES ══ */
-  .hx-srv-list { border-top: 1px solid rgb(var(--color-ink)); }
-  .hx-srv { display: grid; grid-template-columns: auto 1fr; gap: 0.4rem 1.5rem; align-items: center; padding: clamp(1.5rem, 3vw, 2.4rem) 0; border-bottom: 1px solid rgb(var(--color-line)); }
-  @media (min-width: 900px) { .hx-srv { grid-template-columns: 3.5rem minmax(0, 16rem) 1fr auto auto; } }
-  .hx-srv__no { font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; color: rgb(var(--color-accent-text)); }
-  .hx-srv__title { font-family: 'Space Grotesk Variable', sans-serif; font-weight: 700; font-size: clamp(1.5rem, 3vw, 2.4rem); line-height: 1; letter-spacing: -0.02em; transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
-  .hx-srv__desc { display: none; color: rgb(var(--color-muted)); max-width: 26rem; }
-  @media (min-width: 900px) { .hx-srv__desc { display: block; } }
-  .hx-srv__tags { display: none; gap: 0.6rem; }
-  @media (min-width: 1100px) { .hx-srv__tags { display: inline-flex; } }
-  .hx-srv__arrow { color: rgb(var(--color-accent-text)); font-size: 1.3rem; opacity: 0; transform: translateX(-0.5rem); transition: opacity 0.3s, transform 0.3s; }
-  .hx-srv:hover .hx-srv__title { transform: translateX(0.6rem); }
-  .hx-srv:hover .hx-srv__arrow { opacity: 1; transform: translateX(0); }
+  /* ══ HOW WE USE AI ══ */
+  .hx-ai__body { display: grid; gap: 2rem; }
+  @media (min-width: 900px) { .hx-ai__body { grid-template-columns: 1.1fr 1fr; align-items: start; gap: 3rem; } }
+  .hx-ai__lead { max-width: 38rem; font-size: 1.05rem; line-height: 1.6; color: rgb(var(--color-muted)); }
+  .hx-ai__tags { display: flex; flex-wrap: wrap; gap: 0.6rem; align-content: flex-start; }
+  .hx-ai__tags li { border: 1px solid rgb(var(--color-line)); padding: 0.55rem 1rem; font-size: 0.85rem; }
 
   /* ══ PROCESS ══ */
   .hx-proc-head, .hx-stats-head { margin-bottom: 3rem; }

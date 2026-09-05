@@ -1,7 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Reveal from '../components/Reveal.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import FAQAccordion from '../components/FAQAccordion.astro';
 import { site, socials } from '../data/site';
+import { contactFaqs } from '../data/faqs';
 
 const budgets = ['< $10k', '$10k–$25k', '$25k–$50k', '$50k–$100k', '$100k+'];
 const interests = ['Branding', 'Web', 'Product design', 'Development', 'Not sure yet'];
@@ -106,6 +109,18 @@ const interests = ['Branding', 'Web', 'Product design', 'Development', 'Not sure
         <p id="form-note" class="text-sm text-muted"></p>
       </form>
     </Reveal>
+  </section>
+
+  <!-- FAQ -->
+  <section class="container-x section border-t border-line">
+    <div class="grid gap-10 md:grid-cols-12">
+      <div class="md:col-span-4">
+        <SectionHeading index="02" eyebrow="Questions" title="Before you send that." />
+      </div>
+      <div class="md:col-span-8">
+        <FAQAccordion items={contactFaqs} />
+      </div>
+    </div>
   </section>
 </BaseLayout>
 
